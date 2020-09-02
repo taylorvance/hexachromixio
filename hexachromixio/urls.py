@@ -15,8 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('hexachromix.urls')),
+
+    path('', TemplateView.as_view(template_name='landing_page.html')),
+    path('rules', TemplateView.as_view(template_name='rules.html')),
+
+    path('game/', include('hexachromix.urls')),
 ]

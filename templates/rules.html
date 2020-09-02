@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content" style="max-width:45rem">
+	<p>Hexachromix is a color mixing strategy game. The goal is to connect opposite sides of the board with your color.</p>
+
+
+	<h3 id="terminology">Terminology</h3>
+	<ul>
+		<li>
+			RGB&nbsp;&nbsp;&ndash;&nbsp;&nbsp;Red, Green, Blue
+			<p class="help">
+				aka the <i>"additive/light primaries"</i> or <i>"secondary subtractive colors"</i>
+				(<a href="https://en.wikipedia.org/wiki/Additive_color" target="_blank">more info</a>)
+			</p>
+		</li>
+		<li>
+			CMY&nbsp;&nbsp;&ndash;&nbsp;&nbsp;Cyan, Magenta, Yellow
+			<p class="help">
+				aka the <i>"subtractive/pigment primaries"</i> or <i>"secondary additive colors"</i>
+				(<a href="https://en.wikipedia.org/wiki/Subtractive_color" target="_blank">more info</a>)
+			</p>
+		</li>
+		<li>Color system&nbsp;&nbsp;&ndash;&nbsp;&nbsp;one of the above sets of three colors</li>
+	</ul>
+
+
+	<h3 id="mixology">Mixology</h3>
+	<p>
+		The diagrams below demonstrate how color mixing works for the RGB and CMY color systems.
+		Notice how mixing two colors from the same system produces a color in the other system.
+		This is the key game mechanic of Hexachromix.
+	</p>
+	<div class="has-text-centered">
+		<svg width="200" height="200" viewbox="-1 -1 2 2" style="margin:0.5rem 1rem">
+			<circle cx="0" cy="0" r="1" fill="#ccc"/>
+			<g style="isolation:isolate">
+				<circle cx="0" cy="-0.3" r="0.6" fill="#f00" style="mix-blend-mode:screen"/>
+				<circle cx="0.26" cy="0.15" r="0.6" fill="#0f0" style="mix-blend-mode:screen"/>
+				<circle cx="-0.26" cy="0.15" r="0.6" fill="#00f" style="mix-blend-mode:screen"/>
+			</g>
+		</svg>
+
+		<svg width="200" height="200" viewbox="-1 -1 2 2" style="margin:0.5rem 1rem">
+			<circle cx="0" cy="0" r="1" fill="#ccc"/>
+			<g style="isolation:isolate">
+				<circle cx="-0.26" cy="-0.15" r="0.6" fill="#f0f" style="mix-blend-mode:multiply"/>
+				<circle cx="0.26" cy="-0.15" r="0.6" fill="#ff0" style="mix-blend-mode:multiply"/>
+				<circle cx="0" cy="0.3" r="0.6" fill="#0ff" style="mix-blend-mode:multiply"/>
+			</g>
+		</svg>
+	</div>
+
+
+	<h3 id="gameplay">
+		Gameplay
+		<i class="help">-ology?</i>
+	</h3>
+	<p>
+		Hexachromix can be played with 2-6 players.
+		All six colors must be controlled by someone.
+		A player may control multiple colors, as long as those colors are on the same team <i>(see <a href="#variants">Variants</a> for more information)</i>.
+	</p>
+	<p>
+		Red goes first and play continues clockwise (RYGCBM order).
+		You may not skip a turn. If there are no moves available on your turn, the game ends in a draw.
+	</p>
+
+	<p>
+		There are three kinds of legal moves:
+		<ul>
+			<li><b>Claim</b> an empty space</li>
+			<li>
+				<b>Share</b> a space with <i>only one</i> of the other colors from the same color system
+				<p class="help">This applies whether or not the other color is on your team.</p>
+			</li>
+			<li>
+				<b>Mix</b> a space containing <i>both</i> of the colors from the other system which, when mixed, produce your color
+				<p class="help">This applies whether or not the colors are on your team.</p>
+			</li>
+		</ul>
+	</p>
+
+	<p>
+		[replace this list with images]
+		For example, Red is able to:
+		<ul>
+			<li>Claim an empty space;</li>
+			<li>Share a space containing only Green;</li>
+			<li>Share a space containing only Blue; or</li>
+			<li>Mix a space containing both Magenta and Yellow (removing them both and replacing them with Red).</li>
+		</ul>
+	</p>
+
+
+	<h3 id="variants">Variants</h3>
+	<p>
+		All variants use the same rules and turn order (RYGCBM).
+		However, you may find that these variants call for varied strategies and tactics.
+	</p>
+	<p>
+		There are many ways to divide the six colors into teams.
+		A player may control any number of colors on the same team.
+		As mentioned in the <a href="#gameplay">Gameplay</a> section, all colors must be controlled by someone.
+	</p>
+
+	[show pics for all of these]
+	<h5>3v3 variants</h5>
+	<p>
+		MRY GCB
+		<br>RGB CMY
+	</p>
+
+	<h5>2v2v2 variants</h5>
+	<p>
+		RC YB GM
+		<br>MR YG CB
+	</p>
+
+	<h5>Free-for-all variant</h5>
+	<p>
+		R Y G C B M
+	</p>
+
+
+	<h3 id="winning">Winning</h3>
+	<p>
+		The first player who connects their side of the board to the opposite side, via adjacent spaces containing their color, is the winner.
+		The color that makes such a connection wins the game for the whole team.
+	</p>
+	[show a winning state or move]
+</div>
+{% endblock content %}
