@@ -47,13 +47,19 @@
 					</figure>
 				</a>
 
+				<a href="/" class="navbar-item">Hexachromix</a>
+				<a href="/rules" class="navbar-item">Rules</a>
+
+				{% comment %}
 				<a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navMenu">
 					<span aria-hidden="true"></span>
 					<span aria-hidden="true"></span>
 					<span aria-hidden="true"></span>
 				</a>
+				{% endcomment %}
 			</div>
 
+			{% comment %}
 			<div id="navMenu" class="navbar-menu">
 				<div class="navbar-start">
 					<a href="/" class="navbar-item">Home</a>
@@ -69,12 +75,13 @@
 					</div>
 				</div>
 			</div>
+			{% endcomment %}
 		</nav>
 
 		<section class="section">
 			<div class="container">
 				<div class="columns is-centered">
-					<div class="column is-narrow">
+					<div class="column is-narrow" style="max-width:100vw; padding:0 5vw;">
 						{% block content %}<p>placeholder content...</p>{% endblock content %}
 					</div>
 				</div>

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content">
+	<h2>Create a Game</h2>
+
+	<form action="/game/create/" method="post">
+		{% csrf_token %}
+
+		<div class="columns">
+			{% for variant in variants %}
+				<div class="column">
+					<div class="card is-inline-block">
+						<div class="card-image">
+							<figure class="image is-128x128">
+								<img src="/static/img/logo.png" alt="{{ variant.label }}">
+							</figure>
+						</div>
+
+						<header class="card-header">
+							<p class="card-header-title">{{ variant.label }}</p>
+						</header>
+
+						<div class="card-content">
+							{{ variant.teams }} teams
+							<br>
+							{{ variant.teams }}+ players
+						</div>
+
+						<div class="card-footer" style="text-align:center">
+							<div class="card-footer-item">
+								<button type="submit" class="button is-link" name="variant" value="{{ variant.value }}">Create</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+	</form>
+</div>
+
+{% comment %}
+<form action="{% url 'create_or_join' %}" method="post">
+	{% csrf_token %}
+	<div class="field has-addons">
+		<div class="control">
+			{{ form.name }}
+		</div>
+		<div class="control">
+			<button class="button is-link">Go</button>
+		</div>
+	</div>
+	<p class="help">Create a game, or join a game in progress.</p>
+</form>
+{% endcomment %}
+{% endblock content %}
