@@ -25,19 +25,19 @@ SECRET_KEY = '2s^(7p_(p)hn8f+k8(n+s&!2^y+zwby*)=b_v($948fb6%l2uz'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '192.168.1.185']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'hexachromix.apps.HexachromixConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'hexachromix',
 ]
 
 MIDDLEWARE = [
