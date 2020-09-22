@@ -1,42 +1,55 @@
 {% extends 'base.html' %}
 
+
 {% block content %}
 <div class="content">
-	<h2>Create a Game</h2>
+	<h3 class="orbitron">Join a Game</h3>
+	<form action="/game/search" method="get">
+		<div class="field has-addons">
+			<div class="control">
+				<input type="text" class="input" name="game_uid" placeholder="Game id">
+			</div>
+			<div class="control">
+				<button type="submit" class="button is-primary">Join</button>
+			</div>
+		</div>
+	</form>
 
-	<form action="/game/create/" method="post">
-		{% csrf_token %}
+	<h3 class="orbitron">Create a Game</h3>
+	{% if user.is_authenticated %}
+		<form action="/game/create/" method="post">
+			{% csrf_token %}
 
-		<div class="columns">
 			{% for variant in variants %}
-				<div class="column">
-					<div class="card is-inline-block">
-						<div class="card-image">
-							<figure class="image is-128x128">
-								<img src="/static/img/variant-{{ variant.value | lower }}.png" alt="{{ variant.label }}">
-							</figure>
-						</div>
+				<div class="card is-inline-block" style="margin:0.5rem">
+					<div class="card-image">
+						<figure class="image is-128x128">
+							{% load static %}
+							<img src="{% static 'img/variant-'|add:variant.value|lower|add:'.png' %}" alt="{{ variant.label }}">
+						</figure>
+					</div>
 
-						<header class="card-header">
-							<p class="card-header-title">{{ variant.label }}</p>
-						</header>
+					<header class="card-header">
+						<p class="card-header-title">{{ variant.label }}</p>
+					</header>
 
-						<div class="card-content">
-							{{ variant.teams }} teams
-							<br>
-							{{ variant.teams }}+ players
-						</div>
+					<div class="card-content">
+						{{ variant.teams }} teams
+						<br>
+						{{ variant.players }} players
+					</div>
 
-						<div class="card-footer" style="text-align:center">
-							<div class="card-footer-item">
-								<button type="submit" class="button is-link" name="variant" value="{{ variant.value }}">Create</button>
-							</div>
+					<div class="card-footer" style="text-align:center">
+						<div class="card-footer-item">
+							<button type="submit" class="button is-primary" name="variant" value="{{ variant.value }}">Create</button>
 						</div>
 					</div>
 				</div>
 			{% endfor %}
-		</div>
-	</form>
+		</form>
+	{% else %}
+		<p>Log in or sign up to create a game.</p>
+	{% endif %}
 </div>
 
 {% comment %}
