@@ -24,14 +24,16 @@ SECRET_KEY = '2s^(7p_(p)hn8f+k8(n+s&!2^y+zwby*)=b_v($948fb6%l2uz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+ADMINS = [('Taylor Vance', 'tmax8908@yahoo.com')]
 
-ALLOWED_HOSTS = ['localhost', '192.168.1.185']
+ALLOWED_HOSTS = ['.hexachromix.io', 'localhost', '192.168.1.185']
 
 
 # Application definition
 
 INSTALLED_APPS = [
     'hexachromix.apps.HexachromixConfig',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -69,6 +71,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'hexachromixio.wsgi.application'
+
+ASGI_APPLICATION = 'hexachromixio.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    },
+}
 
 
 # Database
@@ -120,5 +129,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    BASE_DIR / 'static',
 ]

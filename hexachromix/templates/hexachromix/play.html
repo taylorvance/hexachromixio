@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Hexachromix - {{ game.uid }}{% endblock %}
+
+{% block content %}
+{% comment %}<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.min.js"></script>{% endcomment %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.common.dev.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/3.5.1/vuex.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script>
+
+{% load static %}
+
+<div class="content">
+	<div id="app">
+		<div class="columns is-desktop">
+			<div class="column" style="text-align:center">
+				<h3 class="orbitron">[[ colors[currentColor] ]]'s turn</h3>
+
+				<svg viewbox="0 0 100 100" style="width:75vmin; height:75vmin;">
+					{% comment %}<image href="{% static "img/logo.png" %}" width="100" height="100"/>{% endcomment %}
+					<board :x=50 :y=50 :size=50 :hfen="hfen"/>
+				</svg>
+			</div>
+
+			<div class="column is-one-third">
+				{% if user.username == 'taylorvance' %} <p><button v-on:click="test">test</button></p> {% endif %}
+				<p>
+					<button class="button is-small is-rounded" :class="socket_is_live ? 'is-success' : 'is-danger'" style="pointer-events:none">
+						[[ socket_is_live ? 'C' : 'Disc' ]]onnected
+					</button>
+				</p>
+
+				<pre style="display:inline-block; padding:1rem;">[[ hpgn ]]</pre>
+
+				{% if user.username == 'taylorvance' %}
+					<div style='font-size: 0.8em; font-family: "Lucida Console", Monaco, monospace;'>
+						<h4>Debug</h4>
+						<div>id: {{ game.id }}</div>
+						<div>uid: {{ game.uid }}</div>
+						<div>created: {{ game.datetime_created }}</div>
+						<div>hfen: [[ hfen ]]</div>
+					</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+
+	<script type='application/javascript'>
+		var game_uid = '{{ game.uid }}'
+		var game_variant = '{{ game.variant }}'
+	</script>
+
+	{% comment %}<link rel="stylesheet" href="{% static "css/hexachromix-board.css" %}">{% endcomment %}
+	<script src="{% static "js/game.js" %}"></script>
+</div>
+{% endblock content %}

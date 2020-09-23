@@ -1,22 +1,3 @@
-var colorMixin = {
-	data: function() {
-		var colors = {}
-		var hue = 0
-		for(c of "RYGCBM") {
-			colors[c] = {
-				hsl: 'hsl('+hue+', 100%, 45%)',
-				hslLight: 'hsl('+hue+', 70%, 70%)',
-			}
-			hue += 60
-		}
-
-		return {
-			colors: colors,
-		}
-	},
-}
-
-
 const store = new Vuex.Store({
 	state: {
 		hfen: '3/4/5/4/3 R MRY',
@@ -40,12 +21,30 @@ const store = new Vuex.Store({
 })
 
 
+var colorMixin = {
+	data: function() {
+		var colors = {}
+		var hue = 0
+		for(c of "RYGCBM") {
+			colors[c] = {
+				hsl: 'hsl('+hue+', 100%, 45%)',
+				hslLight: 'hsl('+hue+', 75%, 75%)',
+			}
+			hue += 60
+		}
+
+		return {
+			colors: colors,
+		}
+	},
+}
+
+
 Vue.component('board', {
 	delimiters: ['[[', ']]'],
 	props: ['x', 'y', 'size', 'hfen'],
 	computed: {
 		spaceSize: function() {
-			//.if this changes, update the logo cut corners
 			return this.size / store.getters.mapRadius / 2.7
 		},
 		spaces: function() {
@@ -150,7 +149,7 @@ Vue.component('space', {
 			<piece v-if="'Mbr'.includes(char)" :x="x+pieceOffset*Math.cos(150*Math.PI/180)" :y="y-pieceOffset*Math.sin(150*Math.PI/180)" :size="pieceSize" :color="colors.M.hsl" :style="style"/>
 		</g>
 
-		<circle v-if="canPlay" v-on:click="makeMove" :cx="x" :cy="y" :r="size*0.75" stroke="none" fill="hsl(0, 100%, 100%, 1%)" style="cursor:pointer"/>
+		<circle v-if="canPlay" v-on:click="makeMove" :cx="x" :cy="y" :r="size*0.8" stroke="none" fill="hsl(0, 100%, 100%, 1%)" style="cursor:pointer"/>
 	</g>`
 })
 
