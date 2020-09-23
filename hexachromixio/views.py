@@ -1,11 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
-from django.forms import ModelForm
 from hexachromix.models import Game
-
-from django import forms
-from django import template
-register = template.Library()
 
 
 def home(request):
@@ -16,6 +11,18 @@ def home(request):
             'label': variant.label,
             'value': variant.value,
             'teams': num,
+            'players': '%d%s' % (num, '+' if num < 6 else ''),
         })
 
     return render(request, 'home.html', {'variants': variants})
+
+def profile(request):
+    if not request.user.is_authenticated:
+        return redirect('/account/login/')
+
+    if request.user.username == 'taylorvance':
+        games = Game.objects.all().order_by('-datetime_created')
+    else:
+        games = []
+
+    return render(request, 'profile.html', {'games': games})

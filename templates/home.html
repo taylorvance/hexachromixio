@@ -20,11 +20,11 @@
 		<form action="/game/create/" method="post">
 			{% csrf_token %}
 
+			{% load static %}
 			{% for variant in variants %}
 				<div class="card is-inline-block" style="margin:0.5rem">
 					<div class="card-image">
 						<figure class="image is-128x128">
-							{% load static %}
 							<img src="{% static 'img/variant-'|add:variant.value|lower|add:'.png' %}" alt="{{ variant.label }}">
 						</figure>
 					</div>

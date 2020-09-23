@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Hexachromix{% endblock %}
+
+{% block content %}
+<div class="content">
+	<p>
+		{% if user.is_authenticated %}
+			Hi {{ user.username }}.
+		{% else %}
+			Click <a href="/account/login">here</a> to log in.
+		{% endif %}
+	</p>
+
+	{% if games %}
+		<h4>Games</h4>
+		<div>
+			{% for game in games %}
+				<div><a href="/game/{{ game.uid }}">game id {{ game.pk }} ({{ game.uid }}) - variant {{ game.variant }}</a></div>
+			{% endfor %}
+		</div>
+	{% endif %}
+</div>
+{% endblock %}

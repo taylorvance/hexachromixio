@@ -20,10 +20,13 @@ from django.views.generic import TemplateView
 from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-
     path('', views.home, name='home'),
     path('rules/', TemplateView.as_view(template_name='rules.html')),
 
     path('game/', include('hexachromix.urls')),
+
+    path('account/profile/', views.profile, name='profile'),
+    path('account/', include('django.contrib.auth.urls')),
+
+    path('admin/', admin.site.urls),
 ]
