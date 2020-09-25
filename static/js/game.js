@@ -2,20 +2,25 @@ const store = new Vuex.Store({
 	state: {
 		hfen: '3/4/5/4/3 R MRY',
 		myColors: [],
+		isTerminal: false,
 	},
 	mutations: {
 		setHfen: function(state, hfen) { state.hfen = hfen },
 		setMyColors: function(state, colors) { state.myColors = colors },
+		terminate: function(state) { state.isTerminal = true },
 	},
 	getters: {
+		variant: function(state) {
+			return state.hfen.split(' ')[2]
+		},
 		currentColor: function(state) {
 			return state.hfen.split(' ')[1]
 		},
-		mapRadius: function(state) {
-			return (state.hfen.match(/\//g) || []).length / 2
-		},
 		isMyTurn: function(state, getters) {
 			return state.myColors.includes(getters.currentColor)
+		},
+		mapRadius: function(state) {
+			return (state.hfen.match(/\//g) || []).length / 2
 		},
 	},
 })
@@ -27,15 +32,13 @@ var colorMixin = {
 		var hue = 0
 		for(c of "RYGCBM") {
 			colors[c] = {
-				hsl: 'hsl('+hue+', 100%, 45%)',
-				hslLight: 'hsl('+hue+', 75%, 75%)',
+				normal: 'hsl('+hue+', 100%, 45%)',
+				light: 'hsl('+hue+', 70%, 80%)',
 			}
 			hue += 60
 		}
 
-		return {
-			colors: colors,
-		}
+		return {colors: colors}
 	},
 }
 
@@ -75,14 +78,11 @@ Vue.component('board', {
 
 			return spaces
 		},
-		/*
-		function pointy_hex_to_pixel(hex):
-		*/
 	},
 	template: `<g>
 		<logo :x="x" :y="y" :size="size"/>
 
-		<space v-for="space in spaces" :x="space.x" :y="space.y" :q="space.q" :r="space.r" :char="space.char" :size="spaceSize"/>
+		<space v-for="space in spaces" :key="space.id" :x="space.x" :y="space.y" :q="space.q" :r="space.r" :char="space.char" :size="spaceSize"/>
 	</g>`
 })
 
@@ -94,40 +94,35 @@ Vue.component('space', {
 		pieceSize: function() { return this.size * 0.4 },
 		pieceOffset: function() { return this.size * 0.3 },
 		canPlay: function() {
+			if(store.state.isTerminal) return false
+
+			if(this.char == store.getters.currentColor.toLowerCase()) return true
+			if(this.char == '') return true
+
 			if(store.getters.currentColor == 'R') {
-				if(this.char=='' || 'rBG'.includes(this.char)) return true
+				if('BG'.includes(this.char)) return true
 			} else if(store.getters.currentColor == 'Y') {
-				if(this.char=='' || 'yMC'.includes(this.char)) return true
+				if('MC'.includes(this.char)) return true
 			} else if(store.getters.currentColor == 'G') {
-				if(this.char=='' || 'gRB'.includes(this.char)) return true
+				if('RB'.includes(this.char)) return true
 			} else if(store.getters.currentColor == 'C') {
-				if(this.char=='' || 'cYM'.includes(this.char)) return true
+				if('YM'.includes(this.char)) return true
 			} else if(store.getters.currentColor == 'B') {
-				if(this.char=='' || 'bGR'.includes(this.char)) return true
+				if('GR'.includes(this.char)) return true
 			} else if(store.getters.currentColor == 'M') {
-				if(this.char=='' || 'mCY'.includes(this.char)) return true
+				if('CY'.includes(this.char)) return true
 			}
 
 			return false
 		},
 		highlight: function() {
-			if(this.canPlay) return this.colors[store.getters.currentColor].hslLight
+			if(this.canPlay) return this.colors[store.getters.currentColor].light
 			else return '#eee'
 		},
 		style: function() {
-			if(!this.char) return ''
-			else if('RGBcmy'.includes(this.char)) return 'mix-blend-mode:screen'
+			if('RGBcmy'.includes(this.char)) return 'mix-blend-mode:screen'
 			else if('rgbCMY'.includes(this.char)) return 'mix-blend-mode:multiply'
-		},
-		curHue: function() {
-			return {
-				"R": 0,
-				"Y": 60,
-				"G": 120,
-				"C": 180,
-				"B": 240,
-				"M": 300,
-			}[store.getters.currentColor]
+			else return ''
 		},
 	},
 	methods: {
@@ -140,13 +135,13 @@ Vue.component('space', {
 	template: `<g>
 		<hexagon :x="x" :y="y" :r="size" :fill="highlight" stroke="#555"/>
 
-		<g style="isolation:isolate">
-			<piece v-if="'Rmy'.includes(char)" :x="x" :y="y-pieceOffset*Math.sin(90 * Math.PI/180)" :size="pieceSize" :color="colors.R.hsl" :style="style"/>
-			<piece v-if="'Yrg'.includes(char)" :x="x+pieceOffset*Math.cos(30*Math.PI/180)" :y="y-pieceOffset*Math.sin(30*Math.PI/180)" :size="pieceSize" :color="colors.Y.hsl" :style="style"/>
-			<piece v-if="'Gyc'.includes(char)" :x="x+pieceOffset*Math.cos(330*Math.PI/180)" :y="y-pieceOffset*Math.sin(330*Math.PI/180)" :size="pieceSize" :color="colors.G.hsl" :style="style"/>
-			<piece v-if="'Cgb'.includes(char)" :x="x" :y="y-pieceOffset*Math.sin(270*Math.PI/180)" :size="pieceSize" :color="colors.C.hsl" :style="style"/>
-			<piece v-if="'Bcm'.includes(char)" :x="x+pieceOffset*Math.cos(210*Math.PI/180)" :y="y-pieceOffset*Math.sin(210*Math.PI/180)" :size="pieceSize" :color="colors.B.hsl" :style="style"/>
-			<piece v-if="'Mbr'.includes(char)" :x="x+pieceOffset*Math.cos(150*Math.PI/180)" :y="y-pieceOffset*Math.sin(150*Math.PI/180)" :size="pieceSize" :color="colors.M.hsl" :style="style"/>
+		<g v-if="char" style="isolation:isolate">
+			<piece v-if="'Rmy'.includes(char)" char="R" :x="x" :y="y-pieceOffset*Math.sin(Math.PI/2)" :size="pieceSize" style="mix-blend-mode:screen"/>
+			<piece v-if="'Yrg'.includes(char)" char="Y" :x="x+pieceOffset*Math.cos(Math.PI/6)" :y="y-pieceOffset*Math.sin(Math.PI/6)" :size="pieceSize" style="mix-blend-mode:multiply"/>
+			<piece v-if="'Gyc'.includes(char)" char="G" :x="x+pieceOffset*Math.cos(11*Math.PI/6)" :y="y-pieceOffset*Math.sin(11*Math.PI/6)" :size="pieceSize" style="mix-blend-mode:screen"/>
+			<piece v-if="'Cgb'.includes(char)" char="C" :x="x" :y="y-pieceOffset*Math.sin(3*Math.PI/2)" :size="pieceSize" style="mix-blend-mode:multiply"/>
+			<piece v-if="'Bcm'.includes(char)" char="B" :x="x+pieceOffset*Math.cos(7*Math.PI/6)" :y="y-pieceOffset*Math.sin(7*Math.PI/6)" :size="pieceSize" style="mix-blend-mode:screen"/>
+			<piece v-if="'Mbr'.includes(char)" char="M" :x="x+pieceOffset*Math.cos(5*Math.PI/6)" :y="y-pieceOffset*Math.sin(5*Math.PI/6)" :size="pieceSize" style="mix-blend-mode:multiply"/>
 		</g>
 
 		<circle v-if="canPlay" v-on:click="makeMove" :cx="x" :cy="y" :r="size*0.8" stroke="none" fill="hsl(0, 100%, 100%, 1%)" style="cursor:pointer"/>
@@ -159,12 +154,12 @@ Vue.component('hexagon', {
 	computed: {
 		points: function() {
 			var pts = [
-				[this.x, this.y - this.r * Math.sin(90*Math.PI/180)],
-				[this.x + this.r * Math.cos(30*Math.PI/180), this.y - this.r * Math.sin(30*Math.PI/180)],
-				[this.x + this.r * Math.cos(330*Math.PI/180), this.y - this.r * Math.sin(330*Math.PI/180)],
-				[this.x, this.y - this.r*Math.sin(270*Math.PI/180)],
-				[this.x + this.r * Math.cos(210*Math.PI/180), this.y - this.r * Math.sin(210*Math.PI/180)],
-				[this.x + this.r * Math.cos(150*Math.PI/180), this.y - this.r * Math.sin(150*Math.PI/180)],
+				[this.x, this.y - this.r * Math.sin(Math.PI/2)],
+				[this.x + this.r * Math.cos(Math.PI/6), this.y - this.r * Math.sin(Math.PI/6)],
+				[this.x + this.r * Math.cos(11*Math.PI/6), this.y - this.r * Math.sin(11*Math.PI/6)],
+				[this.x, this.y - this.r*Math.sin(3*Math.PI/2)],
+				[this.x + this.r * Math.cos(7*Math.PI/6), this.y - this.r * Math.sin(7*Math.PI/6)],
+				[this.x + this.r * Math.cos(5*Math.PI/6), this.y - this.r * Math.sin(5*Math.PI/6)],
 			]
 
 			var out = ""
@@ -180,10 +175,26 @@ Vue.component('hexagon', {
 })
 
 Vue.component('piece', {
+	mixins: [colorMixin],
 	delimiters: ['[[', ']]'],
-	props: ['x', 'y', 'size', 'color'],
+	props: ['x', 'y', 'size', 'char'],
+	computed: {
+		color: function() { return this.colors[this.char].normal },
+		multiplier: function() {
+			return 1
+			return (store.getters.currentColor == this.char ? 1.2 : 1)
+		},
+		stroke: function() {
+			return 'none'
+			return (store.getters.currentColor == this.char ? '#333' : 'none')
+		},
+	},
 	template: `<g>
-		<circle :cx="x" :cy="y" :r="size" :fill="color"/>
+		<circle :cx="x" :cy="y" :r="size * multiplier" :fill="color" :stroke="stroke" stroke-width="0.5"/>
+		<g v-if="false && stroke!='none'">
+			<circle :cx="x" :cy="y" :r="size * multiplier * 0.95" fill="none" stroke="#eee" stroke-width="0.3"/>
+			<circle :cx="x" :cy="y" :r="size * multiplier * 0.9" fill="none" stroke="#333" stroke-width="0.3"/>
+		</g>
 	</g>`
 })
 
@@ -195,10 +206,10 @@ Vue.component('logo', {
 		hexagonPoints: function(size) {
 			var piThirds = Math.PI / 3
 			var pts = []
-			for(i=1; i<=6; i++) {
+			for(i = 2; i >= -4; i--) {
 				pts.push([
-					this.x + size * -Math.cos(i * piThirds),
-					this.y + size * -Math.sin(i * piThirds),
+					this.x + size * Math.cos(i * piThirds),
+					this.y - size * Math.sin(i * piThirds),
 				])
 			}
 			return pts
@@ -212,16 +223,27 @@ Vue.component('logo', {
 		},
 	},
 	template: `<g>
-		<polygon :points="polygonPoints(0)" :fill="colors.R.hsl"/>
-		<polygon :points="polygonPoints(1)" :fill="colors.Y.hsl"/>
-		<polygon :points="polygonPoints(2)" :fill="colors.G.hsl"/>
-		<polygon :points="polygonPoints(3)" :fill="colors.C.hsl"/>
-		<polygon :points="polygonPoints(4)" :fill="colors.B.hsl"/>
-		<polygon :points="polygonPoints(5)" :fill="colors.M.hsl"/>
+		<polygon :points="polygonPoints(0)" :fill="colors.R.normal"/>
+		<polygon :points="polygonPoints(1)" :fill="colors.Y.normal"/>
+		<polygon :points="polygonPoints(2)" :fill="colors.G.normal"/>
+		<polygon :points="polygonPoints(3)" :fill="colors.C.normal"/>
+		<polygon :points="polygonPoints(4)" :fill="colors.B.normal"/>
+		<polygon :points="polygonPoints(5)" :fill="colors.M.normal"/>
 
 		<line :x1="hexagonPoints(size)[0][0]" :y1="hexagonPoints(size)[0][1]" :x2="hexagonPoints(size)[3][0]" :y2="hexagonPoints(size)[3][1]" stroke="#fff" :stroke-width="size/10"/>
 		<line :x1="hexagonPoints(size)[1][0]" :y1="hexagonPoints(size)[1][1]" :x2="hexagonPoints(size)[4][0]" :y2="hexagonPoints(size)[4][1]" stroke="#fff" :stroke-width="size/10"/>
 		<line :x1="hexagonPoints(size)[2][0]" :y1="hexagonPoints(size)[2][1]" :x2="hexagonPoints(size)[5][0]" :y2="hexagonPoints(size)[5][1]" stroke="#fff" :stroke-width="size/10"/>
+	</g>`
+})
+
+Vue.component('color-picker', {
+	mixins: [colorMixin],
+	delimiters: ['[[', ']]'],
+	props: ['x', 'y', 'size'],
+	methods: {
+	},
+	template: `<g>
+		<logo :x="x" :y="y" :size="size" opacity="0.2"/>
 	</g>`
 })
 
@@ -232,7 +254,7 @@ var app = new Vue({
 	data: {
 		socket: undefined,
 		socket_is_live: false,
-		moves: [],
+		termination_message: null,
 		colors: {
 			'R': 'Red',
 			'Y': 'Yellow',
@@ -242,65 +264,63 @@ var app = new Vue({
 			'M': 'Magenta',
 		},
 	},
-	beforeMount: function() {//.del this?
+	beforeMount: function() {
 		this.socket = new ReconnectingWebSocket('ws://' + window.location.host + '/ws/play/' + game_uid + '/')
 		this.socket.onopen = this.socket_opened
 		this.socket.onclose = this.socket_closed
 		this.socket.onmessage = this.socket_message
 		this.socket.onerror = this.socket_error
-
-		min = 1
-		max = 100
-		var n = Math.floor(Math.random() * (max - min) + min)
-
-		this.moves = []
-		for(i = 0; i < n; i++) {
-			this.moves.push([
-				Math.floor(Math.random() * 4 - 2),
-				Math.floor(Math.random() * 4 - 2)
-			])
-		}
 	},
 	computed: {
 		hfen: function() { return store.state.hfen },
 		currentColor: function() { return store.getters.currentColor },
-		moveDisplay: function() {
-			var disp = ""
-			var n_row = 1
-			for(i in this.moves) {
-				if(i % 6 == 0) {
-					disp += "\n" + n_row + "."
-					n_row++
-				}
-				var move = this.moves[i]
-				disp += " "
-				disp += (move[0] >= 0 ? "+" : "") + move[0]
-				disp += (move[1] >= 0 ? "+" : "") + move[1]
-			}
-			return disp.substring(1)
-		},
-		hpgn: function() {
-			var hpgn = ''
-			hpgn += '[Variant "' + game_variant + '"]\n'
-			hpgn += '\n' + this.moveDisplay
-			return hpgn
-		},
 	},
 	methods: {
 		socket_opened: function(e) {
 			this.socket_is_live = true
-			console.log('Connected to websocket')
+			console.log("Connected to websocket")
 		},
 		socket_closed: function(e) {
 			this.socket_is_live = false
-			console.error('Disconnected from websocket')
+			console.error("Disconnected from websocket")
 		},
 		socket_message: function(e) {
 			var data = JSON.parse(e.data)
-			console.log('received socket message', data)
+			console.log("Socket message", data)
 
 			if(data.hfen) store.commit('setHfen', data.hfen)
 
+			if(data.termination) {
+				store.commit('terminate')
+
+				if(data.termination == 'CAT') {
+					this.termination_message = "CAT's game"
+				} else if('RYGCBM'.includes(data.termination)) {
+					this.termination_message = this.colors[data.termination].toUpperCase() + " wins!"
+				} else {
+					this.termination_message = "GAME OVER"
+				}
+			}
+
+			if(data.error) {
+				switch(data.error) {
+					case 'OUTDATED_HFEN':
+						alert("You tried to submit a move for an outdated game state. If your board is not updated automatically, please refresh the page.")
+						break
+					case 'OUT_OF_TURN':
+						alert("It is "+data.expected_color+"'s turn, not "+data.color+"'s.")
+						break
+					case 'GAME_OVER':
+						alert("The game has terminated. You cannot make another move.")
+						break
+					case 'ILLEGAL_MOVE':
+						alert("That is not a valid move.")
+						break
+					default:
+						alert("ERROR: " + data.error)
+						break
+				}
+			}
 		},
 		socket_error: function(e) {
 			console.error("Socket error", e)
@@ -309,6 +329,7 @@ var app = new Vue({
 		makeMove: function(q, r) {
 			this.socket.send(JSON.stringify({
 				'action': 'make_move',
+				'hfen': this.hfen,
 				'color': this.currentColor,
 				'q': q,
 				'r': r,
@@ -317,6 +338,7 @@ var app = new Vue({
 
 		test: function() {
 			console.log('test')
+			this.socket.close()
 		},
 	},
 })

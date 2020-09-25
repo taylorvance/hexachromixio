@@ -32,6 +32,6 @@ def view_game(request, game_uid):
         return HttpResponse("game %s not found :(" % game_uid)
 
     if game.is_active:
-        return render(request, 'hexachromix/play.html', {'game': game})
+        return render(request, 'hexachromix/play.html', {'game': game, 'variant': Game.Variant[game.variant].label})
     else:
         return render(request, 'hexachromix/view_game.html', {'game': game})

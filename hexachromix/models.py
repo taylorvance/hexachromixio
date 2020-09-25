@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from time import time
 import random
 
+from hexachromix.utils import HexachromixState
+
 
 class Game(models.Model):
     class Variant(models.TextChoices):
@@ -47,7 +49,7 @@ class Game(models.Model):
 
     @property
     def is_active(self):
-        return True#.
+        return not HexachromixState.state_from_hfen(self.hfen).is_terminal()
 
     @property
     def hpgn(self):
@@ -64,17 +66,16 @@ class Game(models.Model):
 
     @property
     def hfen(self):
-        # The initial HFEN
-        hfen = '3/4/5/4/3 R %s' % self.variant
+        state = HexachromixState(variant=self.variant)
 
-        #.get hfen from most recent move
-        chars = "RYGCBMrygcbm"
-        hfen = ''
-        for n in [3,4,5,4,3]:
-            hfen += ''.join(random.choices(chars,k=n)) + '/'
-        hfen = '%s %s %s' % (hfen[:-1], random.choice('RYGCBM'), self.variant)
+        for move in self.moves:
+            state = state.make_move((move.q, move.r))
 
-        return hfen
+        return state.hfen
+
+    @staticmethod
+    def state_from_hfen(hfen):
+        return HexachromixState.state_from_hfen(hfen)
 
 
 class Move(models.Model):
@@ -95,17 +96,14 @@ class Move(models.Model):
 
     @property
     def hfen(self):
-        hfen = ''
+        state = HexachromixState(variant=self.game.variant)
 
-        # state = HexachromixState()
+        for move in self.game.moves:
+            state = state.make_move((move.q, move.r))
+            if self is move:
+                break
 
-        moves = self.game.moves
-        for move in moves:
-            # state = state.make_move(move)
-            # hfen += state.get_hfen()
-            pass
-
-        return hfen
+        return state.hfen
 
     class Meta:
         order_with_respect_to = 'game'

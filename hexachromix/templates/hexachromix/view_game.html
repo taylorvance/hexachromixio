@@ -3,11 +3,31 @@
 {% block title %}Hexachromix - {{ game.uid }}{% endblock %}
 
 {% block content %}
-<div class="content">
-	<p>This is game {{ game.uid }} (id {{ game.id }}), variant {{ game.variant }}.</p>
-	<p>This game is inactive. You can view the moves but not play.</p>
+{% comment %}<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.min.js"></script>{% endcomment %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.common.dev.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/3.5.1/vuex.min.js"></script>
 
-	<h5>HPGN</h5>
-	<pre><code>{{ game.hpgn }}</code></pre>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script>
+
+{% load static %}
+
+<div class="content">
+	<div id="app">
+		<div class="columns is-desktop">
+			<div class="column" style="text-align:center">
+				<p>This game is no longer active. [ability to scroll through moves]</p>
+
+				<svg viewbox="0 0 100 100" style="width:75vmin; height:75vmin;">
+					<board :x=50 :y=50 :size=50 hfen="{{ game.hfen }}"/>
+				</svg>
+			</div>
+		</div>
+	</div>
+
+	<script type='application/javascript'>
+		var game_uid = '{{ game.uid }}'
+	</script>
+
+	<script src="{% static "js/game.js" %}"></script>
 </div>
 {% endblock content %}

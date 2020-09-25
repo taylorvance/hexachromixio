@@ -14,24 +14,28 @@
 <div class="content">
 	<div id="app">
 		<div class="columns is-desktop">
+			{% if user.username == 'taylorvance' %} <p><button v-on:click="test">test</button></p> {% endif %}
+
 			<div class="column" style="text-align:center">
-				<h3 class="orbitron">[[ colors[currentColor] ]]'s turn</h3>
+				<h4 class="orbitron">Variant &ndash; {{ variant }}</h4>
+				<h3 class="orbitron">
+					[[ termination_message ?? colors[currentColor] + "'s turn" ]]
+				</h3>
 
 				<svg viewbox="0 0 100 100" style="width:75vmin; height:75vmin;">
-					{% comment %}<image href="{% static "img/logo.png" %}" width="100" height="100"/>{% endcomment %}
-					<board :x=50 :y=50 :size=50 :hfen="hfen"/>
+					<circle cx="4" cy="4" r="1.25" stroke="#555" stroke-width="0.35" :fill="[[ socket_is_live ? '#0c0' : '#d00' ]]"/>
+					<text x="6.5" y="4" fill="#555" style="font-size:0.25rem; text-anchor:left; dominant-baseline:central; pointer-events:none;">
+						[[ socket_is_live ? 'Live' : 'Disconnected' ]]
+					</text>
+
+					{% comment %}<color-picker :x=90 :y=10 :size=10 />{% endcomment %}
+
+					<board :x=50 :y=55 :size=50 :hfen="hfen"/>
 				</svg>
 			</div>
 
 			<div class="column is-one-third">
-				{% if user.username == 'taylorvance' %} <p><button v-on:click="test">test</button></p> {% endif %}
-				<p>
-					<button class="button is-small is-rounded" :class="socket_is_live ? 'is-success' : 'is-danger'" style="pointer-events:none">
-						[[ socket_is_live ? 'C' : 'Disc' ]]onnected
-					</button>
-				</p>
-
-				<pre style="display:inline-block; padding:1rem;">[[ hpgn ]]</pre>
+				{% comment %}<p> [mycolors] </p>{% endcomment %}
 
 				{% if user.username == 'taylorvance' %}
 					<div style='font-size: 0.8em; font-family: "Lucida Console", Monaco, monospace;'>
@@ -48,7 +52,7 @@
 
 	<script type='application/javascript'>
 		var game_uid = '{{ game.uid }}'
-		var game_variant = '{{ game.variant }}'
+		var variant = '{{ variant }}'
 	</script>
 
 	{% comment %}<link rel="stylesheet" href="{% static "css/hexachromix-board.css" %}">{% endcomment %}
