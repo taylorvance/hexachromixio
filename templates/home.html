@@ -22,7 +22,7 @@
 
 			{% load static %}
 			{% for variant in variants %}
-				<div class="card is-inline-block" style="margin:0.5rem">
+				<div class="card is-inline-block">
 					<div class="card-image">
 						<figure class="image is-128x128">
 							<img src="{% static 'img/variant-'|add:variant.value|lower|add:'.png' %}" alt="{{ variant.label }}">

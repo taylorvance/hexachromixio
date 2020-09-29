@@ -25,6 +25,8 @@ urlpatterns = [
 
     path('game/', include('hexachromix.urls')),
 
+    path('signup/', views.signup, name='signup'),
+
     path('account/profile/', views.profile, name='profile'),
     path('account/', include('django.contrib.auth.urls')),
 

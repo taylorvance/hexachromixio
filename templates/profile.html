@@ -14,11 +14,34 @@
 
 	{% if games %}
 		<h4>Games</h4>
-		<div>
-			{% for game in games %}
-				<div><a href="/game/{{ game.uid }}">game id {{ game.pk }} ({{ game.uid }}) - variant {{ game.variant }}</a></div>
-			{% endfor %}
-		</div>
+		<table class="table">
+			<thead>
+				<tr>
+					<th align="right">pk</th>
+					<th>UID</th>
+					<th>Variant</th>
+					<th align="right"># Moves</th>
+					<th>Result</th>
+					<th>HFEN</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for game in games %}
+					<tr>
+						<th align="right">{{ game.id }}</th>
+						<th style="font-family: 'Lucida Console', Monaco, monospace">
+							<a href="/game/{{ game.uid }}">{{ game.uid }}</a>
+						</th>
+						<th>{{ game.get_variant_display }}</th>
+						<th align="right">{{ game.moves | length }}</th>
+						<th>{{ game.result }}</th>
+						<th style="font-family: 'Lucida Console', Monaco, monospace">
+							{{ game.hfen }}
+						</th>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
 	{% endif %}
 </div>
 {% endblock %}
