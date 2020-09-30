@@ -24,7 +24,7 @@
 					[[ termination_message ?? colors[currentColor] + "'s turn" ]]
 				</h3>
 
-				<svg viewbox="0 0 100 100" style="width:75vmin; height:75vmin;">
+				<svg viewbox="0 0 100 100" style="width:80vmin; height:80vmin;">
 					<circle cx="4" cy="4" r="1.25" stroke="#555" stroke-width="0.35" :fill="[[ socket_is_live ? '#0c0' : '#d00' ]]"/>
 					<text x="6.5" y="4" fill="#555" style="font-size:0.25rem; text-anchor:left; dominant-baseline:central; pointer-events:none;">
 						[[ socket_is_live ? 'Live' : 'Disconnected' ]]

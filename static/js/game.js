@@ -371,6 +371,7 @@ Vue.component('move-browser', {
 
 
 var app = new Vue({
+	mixins: [colorMixin],
 	delimiters: ['[[', ']]'],
 	el: '#app',
 	data: {
@@ -378,16 +379,15 @@ var app = new Vue({
 		socket_is_live: false,
 		pid: undefined,
 		termination_message: null,
-		colors: {
-			'R': 'Red',
-			'Y': 'Yellow',
-			'G': 'Green',
-			'C': 'Cyan',
-			'B': 'Blue',
-			'M': 'Magenta',
-		},
 	},
 	beforeMount: function() {
+		this.colors.R.name = 'Red'
+		this.colors.Y.name = 'Yellow'
+		this.colors.G.name = 'Green'
+		this.colors.C.name = 'Cyan'
+		this.colors.B.name = 'Blue'
+		this.colors.M.name = 'Magenta'
+
 		if(IS_LIVE !== false) {
 			var game_uid = JSON.parse(document.getElementById('GAMEUID').textContent)
 
@@ -420,7 +420,12 @@ var app = new Vue({
 
 			if(typeof data.pid !== 'undefined') this.pid = data.pid
 
-			if(data.hfen) store.commit('setHfen', data.hfen)
+			if(data.hfen) {
+				store.commit('setHfen', data.hfen)
+				if(data.move) {
+					//.store to array?
+				}
+			}
 
 			if(data.color_players) {
 				store.commit('setColorPlayers', data.color_players)
@@ -432,7 +437,7 @@ var app = new Vue({
 				if(data.termination == 'DRAW') {
 					this.termination_message = "DRAW"
 				} else if('RYGCBM'.includes(data.termination)) {
-					this.termination_message = this.colors[data.termination].toUpperCase() + " wins!"
+					this.termination_message = this.colors[data.termination].name.toUpperCase() + " wins!"
 				} else {
 					this.termination_message = "GAME OVER"
 				}

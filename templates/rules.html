@@ -3,144 +3,253 @@
 {% block title %}Hexachromix Rules{% endblock %}
 
 {% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.common.dev.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/3.5.1/vuex.min.js"></script>
+
 <div class="content" style="max-width:40rem">
-	<p>
-		Hexachromix is a color mixing strategy game.
-		The goal is to connect opposite sides of the board using your color.
-	</p>
+	<div id="app">
+		<p>
+			Hexachromix is a color mixing strategy game.
+			The goal is to connect opposite sides of the board using your color.
+		</p>
 
 
-	<h3 id="terminology" class="orbitron">Terminology</h3>
-	<ul>
-		<li>
-			RGB&nbsp;&nbsp;&ndash;&nbsp;&nbsp;Red, Green, Blue
-			<p class="help">
-				aka the <i>"additive/light primaries"</i> or <i>"secondary subtractive colors"</i>
-				(<a href="https://en.wikipedia.org/wiki/Additive_color" target="_blank">more info</a>)
-			</p>
-		</li>
-		<li>
-			CMY&nbsp;&nbsp;&ndash;&nbsp;&nbsp;Cyan, Magenta, Yellow
-			<p class="help">
-				aka the <i>"subtractive/pigment primaries"</i> or <i>"secondary additive colors"</i>
-				(<a href="https://en.wikipedia.org/wiki/Subtractive_color" target="_blank">more info</a>)
-			</p>
-		</li>
-		<li>Color system&nbsp;&nbsp;&ndash;&nbsp;&nbsp;one of the above sets of three colors</li>
-	</ul>
+		<h3 id="terminology" class="orbitron">Terminology</h3>
+		<ul>
+			<li>RGB&nbsp;&nbsp;&ndash;&nbsp;&nbsp;Red, Green, Blue</li>
+			<li>CMY&nbsp;&nbsp;&ndash;&nbsp;&nbsp;Cyan, Magenta, Yellow</li>
+			<li>Color system&nbsp;&nbsp;&ndash;&nbsp;&nbsp;one of the above sets of three colors</li>
+		</ul>
 
 
-	<h3 id="mixology" class="orbitron">Mixology</h3>
-	<p>
-		The diagrams below demonstrate how color mixing works for the RGB and CMY color systems.
-		Notice how mixing two colors from the same system produces a color in the other system.
-		This is the key game mechanic of Hexachromix.
-	</p>
-	<div class="has-text-centered">
-		<svg width="200" height="200" viewbox="-1 -1 2 2" style="margin:0.5rem 1rem">
-			<circle cx="0" cy="0" r="1" fill="#ccc"/>
-			<g style="isolation:isolate">
-				<circle cx="0" cy="-0.3" r="0.6" fill="#f00" style="mix-blend-mode:screen"/>
-				<circle cx="0.26" cy="0.15" r="0.6" fill="#0f0" style="mix-blend-mode:screen"/>
-				<circle cx="-0.26" cy="0.15" r="0.6" fill="#00f" style="mix-blend-mode:screen"/>
-			</g>
-		</svg>
+		<h3 id="mixology" class="orbitron">Mixology</h3>
+		<p>
+			The diagrams below demonstrate how color mixing works for the RGB and CMY color systems.
+			Notice how mixing two colors from the same system produces a color in the other system.
+			This is the key game mechanic of Hexachromix.
+		</p>
+		<div class="has-text-centered">
+			<svg width="200" height="200" viewbox="-2 -2 4 4" style="margin:0.5rem 1rem">
+				<logo :x=0 :y=0 :size=2 />
 
-		<svg width="200" height="200" viewbox="-1 -1 2 2" style="margin:0.5rem 1rem">
-			<circle cx="0" cy="0" r="1" fill="#ccc"/>
-			<g style="isolation:isolate">
-				<circle cx="-0.26" cy="-0.15" r="0.6" fill="#f0f" style="mix-blend-mode:multiply"/>
-				<circle cx="0.26" cy="-0.15" r="0.6" fill="#ff0" style="mix-blend-mode:multiply"/>
-				<circle cx="0" cy="0.3" r="0.6" fill="#0ff" style="mix-blend-mode:multiply"/>
-			</g>
+				<g style="isolation:isolate">
+					<circle cx="0" :cy="0.4 * -Math.sin(Math.PI/2)" r="0.6" :fill="colors.R.normal" style="mix-blend-mode:screen"/>
+					<circle :cx="0.4 * Math.cos(11*Math.PI/6)" :cy="0.4 * -Math.sin(11*Math.PI/6)" r="0.6" :fill="colors.G.normal" style="mix-blend-mode:screen"/>
+					<circle :cx="0.4 * Math.cos(7*Math.PI/6)" :cy="0.4 * -Math.sin(7*Math.PI/6)" r="0.6" :fill="colors.B.normal" style="mix-blend-mode:screen"/>
+				</g>
+			</svg>
+
+			<svg width="200" height="200" viewbox="-2 -2 4 4" style="margin:0.5rem 1rem">
+				<logo :x=0 :y=0 :size=2 />
+
+				<g style="isolation:isolate">
+					<circle :cx="0.4 * Math.cos(5*Math.PI/6)" :cy="0.4 * -Math.sin(5*Math.PI/6)" r="0.6" :fill="colors.M.normal" style="mix-blend-mode:multiply"/>
+					<circle :cx="0.4 * Math.cos(Math.PI/6)" :cy="0.4 * -Math.sin(Math.PI/6)" r="0.6" :fill="colors.Y.normal" style="mix-blend-mode:multiply"/>
+					<circle cx="0" :cy="0.4 * -Math.sin(3*Math.PI/2)" r="0.6" :fill="colors.C.normal" style="mix-blend-mode:multiply"/>
+				</g>
+			</svg>
+		</div>
+		<p class="help">
+			For more information (though it's not necessary to learn the game),
+			look up <a href="https://en.wikipedia.org/wiki/Additive_color" target="_blank">additive</a>
+			and <a href="https://en.wikipedia.org/wiki/Subtractive_color" target="_blank">subtractive</a> primary colors.
+		</p>
+
+
+		<h3 id="gameplay" class="orbitron">
+			Gameplay
+			<i class="help">-ology?</i>
+		</h3>
+		<p>
+			Hexachromix can be played with 2-6 players.
+			All six colors must be controlled by someone.
+			A player may control multiple colors from the same team <i>(see <a href="#variants">Variants</a> for more information)</i>.
+		</p>
+		<p>
+			Red goes first and play continues clockwise (RYGCBM order).
+			You may not skip a turn. If there are no moves available on your turn, the game ends in a draw.
+		</p>
+
+		<p>
+			There are three kinds of moves:
+			<ul>
+				<li><b>Claim</b> an empty space</li>
+				<li>
+					<b>Share</b> a space with <i>exactly one</i> of the other colors from the same color system
+					<p class="help">
+						This applies whether or not the other color is on your team.
+					</p>
+				</li>
+				<li>
+					<b>Mix</b> a space containing <i>both</i> of the colors from the other system which, when mixed, produce your color
+					<p class="help">This applies whether or not the colors are on your team.</p>
+				</li>
+			</ul>
+		</p>
+
+		<p>
+			For example, Red is able to:
+			<ul>
+				<li>
+					Claim an empty space<br>
+					<svg width="120" height="60" viewbox="0 0 25 10">
+						<space :x=5 :y=5 :size=5 />
+						<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
+						<space :x=20 :y=5 char="R" :size=5 />
+					</svg>
+				</li>
+				<li>
+					Share a space containing only Green<br>
+					<svg width="120" height="60" viewbox="0 0 25 10">
+						<space :x=5 :y=5 char="G" :size=5 />
+						<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
+						<space :x=20 :y=5 char="y" :size=5 />
+					</svg>
+				</li>
+				<li>
+					Share a space containing only Blue<br>
+					<svg width="120" height="60" viewbox="0 0 25 10">
+						<space :x=5 :y=5 char="B" :size=5 />
+						<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
+						<space :x=20 :y=5 char="m" :size=5 />
+					</svg>
+				</li>
+				<li>
+					Mix a space containing both Magenta and Yellow<br>
+					<svg width="120" height="60" viewbox="0 0 25 10">
+						<space :x=5 :y=5 char="r" :size=5 />
+						<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
+						<space :x=20 :y=5 char="R" :size=5 />
+					</svg>
+				</li>
+			</ul>
+		</p>
+
+
+		<h3 id="variants" class="orbitron">Variants</h3>
+		<p>
+			All variants use the same rules and turn order (RYGCBM).
+			The only difference is how the colors are divided into teams.
+		</p>
+		<p>
+			A player may control any number of colors on the same team.
+			As mentioned in the <a href="#gameplay">Gameplay</a> section, all colors must be controlled by someone.
+		</p>
+
+		{% load static %}
+
+		<h5>3v3 variants</h5>
+		<p>
+			MRY GCB<br>
+			<img src="{% static 'img/variant-mry.svg' %}" />
+			{% comment %}
+			<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+				<logo :x=0 :y=0 :size=50 />
+
+				<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
+				<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
+
+				<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.C.normal" stroke-width="4" />
+				<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.C.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.C.normal" stroke-width="4" />
+
+				<circle cx="0" cy="0" r="4" fill="white"/>
+			</svg>
+			{% endcomment %}
+
+			<br>RGB CMY<br>
+			<img src="{% static 'img/variant-rgb.svg' %}" />
+			{% comment %}
+			<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+				<logo :x=0 :y=0 :size=50 />
+
+				<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
+
+				<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.C.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.C.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.C.normal" stroke-width="4" />
+
+				<circle cx="0" cy="0" r="4" fill="white"/>
+			</svg>
+			{% endcomment %}
+		</p>
+
+		<h5>2v2v2 variants</h5>
+		<p>
+			MR YG CB<br>
+			<img src="{% static 'img/variant-mr.svg' %}" />
+			{% comment %}
+			<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+				<logo :x=0 :y=0 :size=50 />
+
+				<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
+				<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
+
+				<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
+
+				<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.B.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.B.normal" stroke-width="4" />
+
+				<circle cx="0" cy="0" r="4" fill="white"/>
+			</svg>
+			{% endcomment %}
+
+			<br>RC BY GM<br>
+			<img src="{% static 'img/variant-rc.svg' %}" />
+			{% comment %}
+			<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+				<logo :x=0 :y=0 :size=50 />
+
+				<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
+				<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
+
+				<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.B.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.B.normal" stroke-width="4" />
+
+				<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
+
+				<circle cx="0" cy="0" r="4" fill="white"/>
+			</svg>
+			{% endcomment %}
+		</p>
+
+		<h5>Free-for-all variant</h5>
+		<p>
+			R Y G C B M<br>
+			<img src="{% static 'img/variant-r.svg' %}" />
+			{% comment %}
+			<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+				<logo :x=0 :y=0 :size=50 />
+
+				<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.Y.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
+				<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.C.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.B.normal" stroke-width="4" />
+				<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.M.normal" stroke-width="4" />
+
+				<circle cx="0" cy="0" r="4" fill="white"/>
+			</svg>
+			{% endcomment %}
+		</p>
+
+
+		<h3 id="winning" class="orbitron">Winning</h3>
+		<p>
+			The first player who connects their side of the board to the opposite side, via adjacent spaces containing their color, is the winner.
+			The color that makes such a connection wins the game for the whole team.
+		</p>
+		<svg width="200" height="200" viewbox="0 0 100 100">
+			<board :x=50 :y=55 :size=50 hfen="bYm/1RR1/1ycM1/1R2/1R1 Y MRY"/>
 		</svg>
 	</div>
 
-
-	<h3 id="gameplay" class="orbitron">
-		Gameplay
-		<i class="help">-ology?</i>
-	</h3>
-	<p>
-		Hexachromix can be played with 2-6 players.
-		All six colors must be controlled by someone.
-		A player may control multiple colors from the same team <i>(see <a href="#variants">Variants</a> for more information)</i>.
-	</p>
-	<p>
-		Red goes first and play continues clockwise (RYGCBM order).
-		You may not skip a turn. If there are no moves available on your turn, the game ends in a draw.
-	</p>
-
-	<p>
-		There are three kinds of moves:
-		<ul>
-			<li><b>Claim</b> an empty space</li>
-			<li>
-				<b>Share</b> a space with <i>exactly one</i> of the other colors from the same color system
-				<p class="help">
-					This applies whether or not the other color is on your team.
-				</p>
-			</li>
-			<li>
-				<b>Mix</b> a space containing <i>both</i> of the colors from the other system which, when mixed, produce your color
-				<p class="help">This applies whether or not the colors are on your team.</p>
-			</li>
-		</ul>
-	</p>
-
-	<p>
-		For example, Red is able to:
-		[replace this list with images]
-		<ul>
-			<li>Claim an empty space</li>
-			<li>Share a space containing only Green</li>
-			<li>Share a space containing only Blue</li>
-			<li>Mix a space containing both Magenta and Yellow<p class="help">(removing them both and replacing them with Red)</p></li>
-		</ul>
-		[then show illegal moves for red]
-	</p>
-
-
-	<h3 id="variants" class="orbitron">Variants</h3>
-	<p>
-		All variants use the same rules and turn order (RYGCBM).
-		The only difference is how the colors are divided into teams.
-	</p>
-	<p>
-		A player may control any number of colors on the same team.
-		As mentioned in the <a href="#gameplay">Gameplay</a> section, all colors must be controlled by someone.
-	</p>
-
-	{% load static %}
-
-	<h5>3v3 variants</h5>
-	<p>
-		MRY GCB
-		<br>RGB CMY
-		<figure class="image is-128x128"><img src="{% static 'img/variant-mry.png' %}"/></figure>
-		<figure class="image is-128x128"><img src="{% static 'img/variant-rgb.png' %}"/></figure>
-	</p>
-
-	<h5>2v2v2 variants</h5>
-	<p>
-		RC YB GM
-		<br>MR YG CB
-		<figure class="image is-128x128"><img src="{% static 'img/variant-rc.png' %}"/></figure>
-		<figure class="image is-128x128"><img src="{% static 'img/variant-mr.png' %}"/></figure>
-	</p>
-
-	<h5>Free-for-all variant</h5>
-	<p>
-		R Y G C B M
-		<figure class="image is-128x128"><img src="{% static 'img/variant-r.png' %}"/></figure>
-	</p>
-
-
-	<h3 id="winning" class="orbitron">Winning</h3>
-	<p>
-		The first player who connects their side of the board to the opposite side, via adjacent spaces containing their color, is the winner.
-		The color that makes such a connection wins the game for the whole team.
-	</p>
-	[show a winning state or move]
+	<script> var IS_LIVE = false </script>
+	<script src="{% static "js/game.js" %}"></script>
 </div>
 {% endblock content %}
