@@ -1,12 +1,12 @@
 const store = new Vuex.Store({
 	state: {
 		hfen: '3/4/5/4/3 R MRY',
-		myColors: [],
+		colorPlayers: {R:null, Y:null, G:null, C:null, B:null, M:null},
 		isTerminal: false,
 	},
 	mutations: {
 		setHfen: function(state, hfen) { state.hfen = hfen },
-		setMyColors: function(state, colors) { state.myColors = colors },
+		setColorPlayers: function(state, colorPlayers) { state.colorPlayers = colorPlayers },
 		terminate: function(state) { state.isTerminal = true },
 	},
 	getters: {
@@ -15,9 +15,6 @@ const store = new Vuex.Store({
 		},
 		currentColor: function(state) {
 			return state.hfen.split(' ')[1]
-		},
-		isMyTurn: function(state, getters) {
-			return state.myColors.includes(getters.currentColor)
 		},
 		mapRadius: function(state) {
 			return (state.hfen.match(/\//g) || []).length / 2
@@ -47,6 +44,9 @@ Vue.component('board', {
 	delimiters: ['[[', ']]'],
 	props: ['x', 'y', 'size', 'hfen'],
 	computed: {
+		calchfen: function() {
+			return this.hfen ?? store.state.hfen
+		},
 		spaceSize: function() {
 			return this.size / store.getters.mapRadius / 2.7
 		},
@@ -54,7 +54,7 @@ Vue.component('board', {
 			var radius = store.getters.mapRadius
 			var spaces = []
 
-			var chars = store.state.hfen.split(' ')[0].replace(/(\d)/g, function(match) {
+			var chars = this.calchfen.split(' ')[0].replace(/(\d)/g, function(match) {
 				return '-'.repeat(match)
 			}).split('/').join('')
 			var i = 0
@@ -94,10 +94,12 @@ Vue.component('space', {
 		pieceSize: function() { return this.size * 0.4 },
 		pieceOffset: function() { return this.size * 0.3 },
 		canPlay: function() {
+			if(typeof IS_LIVE !== 'undefined' && IS_LIVE === false) return false
 			if(store.state.isTerminal) return false
+			if(!this.$parent.$parent.isMyTurn) return false
 
-			if(this.char == store.getters.currentColor.toLowerCase()) return true
 			if(this.char == '') return true
+			if(this.char == store.getters.currentColor.toLowerCase()) return true
 
 			if(store.getters.currentColor == 'R') {
 				if('BG'.includes(this.char)) return true
@@ -239,12 +241,132 @@ Vue.component('logo', {
 Vue.component('color-picker', {
 	mixins: [colorMixin],
 	delimiters: ['[[', ']]'],
-	props: ['x', 'y', 'size'],
-	methods: {
+	computed: {
+		variantLabel: function() {
+			return this.teams.join(' ')
+		},
+		teams: function() {
+			switch(store.getters.variant) {
+				case 'MRY': return ['MRY', 'GCB']
+				case 'RGB': return ['RGB', 'CMY']
+				case 'MR': return ['MR', 'YG', 'CB']
+				case 'RC': return ['RC', 'BY', 'GM']
+				case 'R': return ['R', 'Y', 'G', 'C', 'B', 'M']
+			}
+		},
+		myTeam: function() {
+			for(team of this.teams) {
+				for(color of team) {
+					if(store.state.colorPlayers[color] == this.$parent.pid) return team
+				}
+			}
+			return null
+		},
 	},
-	template: `<g>
-		<logo :x="x" :y="y" :size="size" opacity="0.2"/>
-	</g>`
+	methods: {
+		isMine: function(color) { return store.state.colorPlayers[color] == this.$parent.pid },
+		isClaimed: function(color) { return store.state.colorPlayers[color] },//.fix
+		canClick: function(color, team) {
+			if(this.isMine(color)) return true
+			else if(this.isClaimed(color)) return false
+			else return !this.myTeam || this.myTeam == team
+		},
+		toggleColor: function(color) {
+			if(this.isMine(color)) {
+				store.state.colorPlayers[color] = null
+				this.$parent.releaseColor(color)
+			} else {
+				store.state.colorPlayers[color] = 'me'
+				this.$parent.claimColor(color)
+			}
+
+			//.request color claim, which will broadcast all colors, then commit the state change there
+		},
+		icon: function(color) {
+			if(this.isMine(color)) return 'fa-user-circle'
+			else if(this.isClaimed(color)) return 'fa-check-circle'
+			else return 'fa-circle'
+		},
+	},
+	template: `<div>
+		<div v-for="team in teams" :key="team.id" style="white-space:nowrap">
+			<span
+				v-for="color in team"
+				:key="color.id"
+				class="icon is-large"
+				v-on:click="canClick(color,team) && toggleColor(color)"
+				style="margin-right:0.5rem;"
+				:style="'color:' + (myTeam&&team!=myTeam ? colors[color].light : colors[color].normal) + '; cursor:' + (canClick(color,team) ? 'pointer' : 'not-allowed')"
+			>
+				<i class="far fa-3x" :class="icon(color)"></i>
+			</span>
+
+			<hr style="margin: 0.5em 0">
+		</div>
+
+
+		<div style="text-align:left">
+			<div><span class="icon"><i class="far fa-user-circle"></i></span>: Mine</div>
+			<div><span class="icon"><i class="far fa-check-circle"></i></span>: Claimed</div>
+			<div><span class="icon"><i class="far fa-circle"></i></span>: Unclaimed</div>
+		</div>
+	</div>`
+})
+
+Vue.component('move-browser', {
+	mixins: [colorMixin],
+	delimiters: ['[[', ']]'],
+	data: function() {
+		var moves = JSON.parse(document.getElementById('move-browser-moves').textContent)
+		return {
+			curIdx: null,
+			moves: moves,
+		}
+	},
+	beforeMount: function() {
+		// prepend the initial state
+		this.moves.unshift({hfen:'3/4/5/4/3 R ' + store.getters.variant})
+		// show the last move on load
+		this.last()
+	},
+	computed: {
+		nrows: function() { return Math.ceil(this.moves.length / 6) },
+		maxDigits: function() { return this.moves.length.toString().length },
+	},
+	methods: {
+		setIdx: function(idx) {
+			// Clamp to [0, length-1]
+			idx = Math.min(Math.max(idx, 0), this.moves.length - 1)
+
+			if(idx !== this.curIdx) {
+				this.curIdx = idx
+				store.commit('setHfen', this.moves[this.curIdx].hfen)
+			}
+		},
+		first: function() { this.setIdx(0) },
+		prev: function() { this.setIdx(this.curIdx - 1) },
+		next: function() { this.setIdx(this.curIdx + 1) },
+		last: function() { this.setIdx(this.moves.length - 1) },
+	},
+	template: `<div style="display:inline-block; text-align:center;">
+		<span class="icon is-large" v-on:click="first" style="cursor:pointer"><i class="fas fa-2x fa-angle-double-left"></i></span>
+		<span class="icon is-large" v-on:click="prev" v-on:keyup.left="prev" style="cursor:pointer"><i class="fas fa-2x fa-angle-left"></i></span>
+		<span class="icon is-large" v-on:click="next" v-on:keyup.right="next" style="cursor:pointer"><i class="fas fa-2x fa-angle-right"></i></span>
+		<span class="icon is-large" v-on:click="last" style="cursor:pointer"><i class="fas fa-2x fa-angle-double-right"></i></span>
+
+		<div style=" font-family:'Lucida Console',Monaco,monospace; white-space:nowrap; text-align:left">
+			<span v-for="(move, idx) in moves" v-if="idx>0">
+				<span style="color:#aaa; font-size:0.6rem; margin-right:-0.4rem;">
+					[[ idx.toString().padStart(maxDigits, '&nbsp;') ]].
+				</span>
+				<span v-on:click="setIdx(idx)" style="font-size:0.8rem; cursor:pointer;" :style="idx==curIdx ? 'background-color:'+colors['RYGCBM'[(idx-1)%6]].light : ''">
+					[[ move.q >= 0 ? '+'+move.q : move.q ]][[ move.r >= 0 ? '+'+move.r : move.r ]]
+				</span>
+
+				<br v-if="idx % 6 == 0">
+			</span>
+		</div>
+	</div>`
 })
 
 
@@ -254,6 +376,7 @@ var app = new Vue({
 	data: {
 		socket: undefined,
 		socket_is_live: false,
+		pid: undefined,
 		termination_message: null,
 		colors: {
 			'R': 'Red',
@@ -265,15 +388,22 @@ var app = new Vue({
 		},
 	},
 	beforeMount: function() {
-		this.socket = new ReconnectingWebSocket('ws://' + window.location.host + '/ws/play/' + game_uid + '/')
-		this.socket.onopen = this.socket_opened
-		this.socket.onclose = this.socket_closed
-		this.socket.onmessage = this.socket_message
-		this.socket.onerror = this.socket_error
+		if(IS_LIVE !== false) {
+			var game_uid = JSON.parse(document.getElementById('GAMEUID').textContent)
+
+			this.socket = new ReconnectingWebSocket('ws://' + window.location.host + '/ws/play/' + game_uid + '/')
+			this.socket.onopen = this.socket_opened
+			this.socket.onclose = this.socket_closed
+			this.socket.onmessage = this.socket_message
+			this.socket.onerror = this.socket_error
+		}
 	},
 	computed: {
 		hfen: function() { return store.state.hfen },
 		currentColor: function() { return store.getters.currentColor },
+		isMyTurn: function() {
+			return store.state.colorPlayers[this.currentColor] == this.pid
+		},
 	},
 	methods: {
 		socket_opened: function(e) {
@@ -288,13 +418,19 @@ var app = new Vue({
 			var data = JSON.parse(e.data)
 			console.log("Socket message", data)
 
+			if(typeof data.pid !== 'undefined') this.pid = data.pid
+
 			if(data.hfen) store.commit('setHfen', data.hfen)
 
-			if(data.termination) {
+			if(data.color_players) {
+				store.commit('setColorPlayers', data.color_players)
+			}
+
+			if(typeof data.termination !== 'undefined') {
 				store.commit('terminate')
 
-				if(data.termination == 'CAT') {
-					this.termination_message = "CAT's game"
+				if(data.termination == 'DRAW') {
+					this.termination_message = "DRAW"
 				} else if('RYGCBM'.includes(data.termination)) {
 					this.termination_message = this.colors[data.termination].toUpperCase() + " wins!"
 				} else {
@@ -302,13 +438,16 @@ var app = new Vue({
 				}
 			}
 
-			if(data.error) {
+			if(typeof data.error !== 'undefined') {
 				switch(data.error) {
 					case 'OUTDATED_HFEN':
-						alert("You tried to submit a move for an outdated game state. If your board is not updated automatically, please refresh the page.")
+						alert("You tried to submit a move for an outdated game state. If the board is not updated automatically, please refresh the page.")
 						break
 					case 'OUT_OF_TURN':
 						alert("It is "+data.expected_color+"'s turn, not "+data.color+"'s.")
+						break
+					case 'NOT_YOUR_COLOR':
+						alert("You do not control that color ("+data.color+").")
 						break
 					case 'GAME_OVER':
 						alert("The game has terminated. You cannot make another move.")
@@ -324,6 +463,22 @@ var app = new Vue({
 		},
 		socket_error: function(e) {
 			console.error("Socket error", e)
+		},
+
+		claimColor: function(color) {
+			this.socket.send(JSON.stringify({
+				'action': 'claim_color',
+				'color': color,
+			}))
+		},
+		releaseColor: function(color) {
+			this.socket.send(JSON.stringify({
+				'action': 'release_color',
+				'color': color,
+			}))
+		},
+		releaseAllColors: function() {
+			this.socket.send(JSON.stringify({'action': 'release_all_colors'}))
 		},
 
 		makeMove: function(q, r) {

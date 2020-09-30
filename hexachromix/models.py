@@ -48,8 +48,18 @@ class Game(models.Model):
         return Move.objects.filter(game=self)
 
     @property
+    def result(self):
+        state = self.state
+        if state.did_win():
+            return 'RYGCBM'[state.prev_color_idx]
+        elif len(state.get_legal_moves()) == 0:
+            return 'DRAW'
+        else:
+            return 'In progress'
+
+    @property
     def is_active(self):
-        return not HexachromixState.state_from_hfen(self.hfen).is_terminal()
+        return not self.state.is_terminal()
 
     @property
     def hpgn(self):
@@ -72,6 +82,10 @@ class Game(models.Model):
             state = state.make_move((move.q, move.r))
 
         return state.hfen
+
+    @property
+    def state(self):
+        return self.state_from_hfen(self.hfen)
 
     @staticmethod
     def state_from_hfen(hfen):

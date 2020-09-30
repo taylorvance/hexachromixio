@@ -26,7 +26,9 @@ SECRET_KEY = '2s^(7p_(p)hn8f+k8(n+s&!2^y+zwby*)=b_v($948fb6%l2uz'
 DEBUG = True
 ADMINS = [('Taylor Vance', 'tmax8908@yahoo.com')]
 
-ALLOWED_HOSTS = ['.hexachromix.io', 'localhost', '192.168.1.185']
+ALLOWED_HOSTS = ['.hexachromix.io', 'localhost']
+ALLOWED_HOSTS.append('192.168.1.185')
+ALLOWED_HOSTS.append('136.49.145.231')
 
 
 # Application definition
@@ -82,7 +84,6 @@ CHANNEL_LAYERS = {
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

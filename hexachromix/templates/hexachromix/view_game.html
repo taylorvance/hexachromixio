@@ -9,24 +9,41 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script>
 
+<script src="https://kit.fontawesome.com/7429ed9b88.js" crossorigin="anonymous"></script>
+
 {% load static %}
 
 <div class="content">
 	<div id="app">
+		<script> var IS_LIVE = false </script>
+
 		<div class="columns is-desktop">
 			<div class="column" style="text-align:center">
-				<p>This game is no longer active. [ability to scroll through moves]</p>
+				<p class="orbitron">Variant: {{ game.get_variant_display }}</p>
+				<p class="orbitron">Result: {{ game.result }}</p>
 
 				<svg viewbox="0 0 100 100" style="width:75vmin; height:75vmin;">
-					<board :x=50 :y=50 :size=50 hfen="{{ game.hfen }}"/>
+					{% with moves|last as move %}
+						<board :x=50 :y=50 :size=50 />
+					{% endwith %}
 				</svg>
+			</div>
+
+			<div class="column">
+				<div class="card">
+					<header class="card-header">
+						<p class="card-header-title">Moves</p>
+					</header>
+					<div class="card-content">
+						<div class="content">
+							{{ moves | json_script:"move-browser-moves" }}
+							<move-browser></move-browser>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
-
-	<script type='application/javascript'>
-		var game_uid = '{{ game.uid }}'
-	</script>
 
 	<script src="{% static "js/game.js" %}"></script>
 </div>

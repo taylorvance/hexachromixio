@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 
 from hexachromix.models import Game
+from hexachromix.utils import HexachromixState
 
 
 def find_game(request):
@@ -29,9 +30,25 @@ def view_game(request, game_uid):
     try:
         game = Game.objects.get(uid=game_uid)
     except Game.DoesNotExist:
-        return HttpResponse("game %s not found :(" % game_uid)
+        return HttpResponse("game %s not found" % game_uid)
 
     if game.is_active:
-        return render(request, 'hexachromix/play.html', {'game': game, 'variant': Game.Variant[game.variant].label})
+        # Make sure a session exists so the channel can generate a player identifier.
+        if not request.session.session_key:
+            request.session.create()
+
+        return render(request, 'hexachromix/play.html', {'game': game})
     else:
-        return render(request, 'hexachromix/view_game.html', {'game': game})
+        state = HexachromixState(variant=game.variant)
+
+        moves = []
+        for move in game.moves:
+            state = state.make_move((move.q, move.r))
+            moves.append({
+                'color': move.color,
+                'q': move.q,
+                'r': move.r,
+                'hfen': state.hfen,
+            })
+
+        return render(request, 'hexachromix/view_game.html', {'game': game, 'moves': moves})
