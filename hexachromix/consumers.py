@@ -20,20 +20,20 @@ class PlayConsumer(WebsocketConsumer):
             self.channel_name
         )
 
-        # Generate an identifier for this player so they can reconnect without losing colors
-        # Hash based on username or session_key, game uid, and salt
+        # Generate an identifier for this player so they can reconnect and maintain color control
         if self.scope['user'].is_authenticated:
             # This allows a user to maintain colors across devices
             self.player_identifier = self.scope['user'].username
         elif self.scope['session'].session_key:
+            # Hash based on ses key, game uid, and salt
             #.move the salt to untracked cfg
-            hashid = str(self.scope['session'].session_key) + self.game_uid + ' makes ma steaks taste great'
+            hashid = str(self.scope['session'].session_key) + self.game_uid + 'makes ma steaks taste great'
             hashid = hashlib.md5(hashid.encode('utf-8')).hexdigest()
             self.player_identifier = str(hashid)[:12]
         else:
             # If they somehow don't have a session, treat them all the same
             self.player_identifier = 'whoareyou'
-        print('PlayConsumer: %s connected to %s' % (self.player_identifier, self.game_uid))
+        # print('PlayConsumer: %s connected to %s' % (self.player_identifier, self.game_uid))
 
         # Accept the connection before sending information about the current game state
         self.accept()
@@ -192,7 +192,7 @@ class PlayConsumer(WebsocketConsumer):
             move.r = r
             move.save()
 
-            # Renew the cache for the color-players
+            # Renew the color-player cache
             cache.touch('game_%s_colors' % self.game_uid, 3600)
 
             state = state.make_move((q, r))
@@ -208,8 +208,8 @@ class PlayConsumer(WebsocketConsumer):
                     }
                 )
 
-                # "Release" the colors from the cache
-                cache_val = cache.delete('game_%s_colors' % self.game_uid)
+                # Delete the color-player cache
+                cache.delete('game_%s_colors' % self.game_uid)
             elif len(state.get_legal_moves()) == 0:
                 async_to_sync(self.channel_layer.group_send)(
                     self.group_name,
@@ -219,8 +219,8 @@ class PlayConsumer(WebsocketConsumer):
                     }
                 )
 
-                # "Release" the colors from the cache
-                cache_val = cache.delete('game_%s_colors' % self.game_uid)
+                # Delete the color-player cache
+                cache.delete('game_%s_colors' % self.game_uid)
 
             # Broadcast the new HFEN to everyone
             async_to_sync(self.channel_layer.group_send)(
