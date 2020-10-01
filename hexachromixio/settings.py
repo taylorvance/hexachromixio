@@ -133,3 +133,9 @@ STATICFILES_DIRS = [
 
 LOGIN_REDIRECT_URL = '/account/profile'
 LOGOUT_REDIRECT_URL = '/'
+
+
+# I think this needs to stay at the end
+# Configure Django App for Heroku.
+import django_on_heroku
+django_on_heroku.settings(locals())
