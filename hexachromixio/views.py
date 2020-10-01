@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.db.models import Q
 
 from hexachromix.models import Game
 
@@ -35,6 +36,7 @@ def signup(request):
 
 @login_required
 def profile(request):
-    games = Game.objects.filter(author=request.user).order_by('-datetime_created')
+    # All games the user created or played
+    games = Game.objects.filter(Q(author=request.user) | Q(move__player=request.user)).order_by('-datetime_created').distinct()
 
     return render(request, 'profile.html', {'games': games})

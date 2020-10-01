@@ -75,44 +75,38 @@
 	</p>
 
 	<p>
-		There are three kinds of moves:
+		<h5>There are three kinds of moves:</h5>
 		<ul>
 			<li>
 				<b>Claim</b> an empty space
 				<br><img src="{% static 'img/move-claim.svg' %}" />
-				{% comment %}
-				<svg width="120" height="60" viewbox="0 0 25 10">
-					<space :x=5 :y=5 :size=5 />
-					<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
-					<space :x=20 :y=5 char="R" :size=5 />
-				</svg>
-				{% endcomment %}
 			</li>
 			<li>
 				<b>Share</b> a space with <i>exactly one</i> of the other colors from the <i>same color system</i>
 				<p class="help">This applies whether or not the other color is on your team.</p>
 				<img src="{% static 'img/move-share-1.svg' %}" />
-				{% comment %}
-				<svg width="120" height="60" viewbox="0 0 25 10">
-					<space :x=5 :y=5 char="G" :size=5 />
-					<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
-					<space :x=20 :y=5 char="y" :size=5 />
-				</svg>
-				{% endcomment %}
 				<br><img src="{% static 'img/move-share-2.svg' %}" />
-				{% comment %}
-				<svg width="120" height="60" viewbox="0 0 25 10">
-					<space :x=5 :y=5 char="B" :size=5 />
-					<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
-					<space :x=20 :y=5 char="m" :size=5 />
-				</svg>
-				{% endcomment %}
 			</li>
 			<li>
 				<b>Mix</b> a space containing <i>both</i> of the colors from the <i>other color system</i> which, when mixed, produce your color
 				<p class="help">This applies whether or not the colors are on your team.</p>
 				<img src="{% static 'img/move-mix.svg' %}" />
 				{% comment %}
+				<svg width="120" height="60" viewbox="0 0 25 10">
+					<space :x=5 :y=5 :size=5 />
+					<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
+					<space :x=20 :y=5 char="R" :size=5 />
+				</svg>
+				<svg width="120" height="60" viewbox="0 0 25 10">
+					<space :x=5 :y=5 char="G" :size=5 />
+					<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
+					<space :x=20 :y=5 char="y" :size=5 />
+				</svg>
+				<svg width="120" height="60" viewbox="0 0 25 10">
+					<space :x=5 :y=5 char="B" :size=5 />
+					<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
+					<space :x=20 :y=5 char="m" :size=5 />
+				</svg>
 				<svg width="120" height="60" viewbox="0 0 25 10">
 					<space :x=5 :y=5 char="r" :size=5 />
 					<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
@@ -131,18 +125,45 @@
 	</p>
 	<p>
 		A player may control any number of colors on the same team.
-		As mentioned in the <a href="#gameplay">Gameplay</a> section, all colors must be controlled by someone.
+		All colors must be controlled by someone.
+	</p>
+	<p>
+		In the diagrams below, teams are designated by different-colored lines.
 	</p>
 
 	<h5>3v3 variants</h5>
 	<p>
 		<div style="display:inline-block; text-align:center; padding:0 1rem;">
 			MRY GCB
+			{% comment %}(Adjacent){% endcomment %}
 			<br><img src="{% static 'img/variant-mry.svg' %}" />
 		</div>
 		<div style="display:inline-block; text-align:center; padding:0 1rem;">
 			RGB CMY
+			{% comment %}(Alternating){% endcomment %}
 			<br><img src="{% static 'img/variant-rgb.svg' %}" />
+		</div>
+	</p>
+
+	<h5>2v2v2 variants</h5>
+	<p>
+		<div style="display:inline-block; text-align:center; padding:0 1rem;">
+			MR YG CB
+			{% comment %}(Adjacent){% endcomment %}
+			<br><img src="{% static 'img/variant-mr.svg' %}" />
+		</div>
+		<div style="display:inline-block; text-align:center; padding:0 1rem;">
+			RC BY GM
+			{% comment %}(Across){% endcomment %}
+			<br><img src="{% static 'img/variant-rc.svg' %}" />
+		</div>
+	</p>
+
+	<h5>Free-for-all variant</h5>
+	<p>
+		<div style="display:inline-block; text-align:center; padding:0 1rem;">
+			R Y G C B M
+			<br><img src="{% static 'img/variant-r.svg' %}" />
 		</div>
 		{% comment %}
 		<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -171,20 +192,6 @@
 
 			<circle cx="0" cy="0" r="4" fill="white"/>
 		</svg>
-		{% endcomment %}
-	</p>
-
-	<h5>2v2v2 variants</h5>
-	<p>
-		<div style="display:inline-block; text-align:center; padding:0 1rem;">
-			MR YG CB
-			<br><img src="{% static 'img/variant-mr.svg' %}" />
-		</div>
-		<div style="display:inline-block; text-align:center; padding:0 1rem;">
-			RC BY GM
-			<br><img src="{% static 'img/variant-rc.svg' %}" />
-		</div>
-		{% comment %}
 		<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
 			<logo :x=0 :y=0 :size=50 />
 
@@ -213,16 +220,6 @@
 
 			<circle cx="0" cy="0" r="4" fill="white"/>
 		</svg>
-		{% endcomment %}
-	</p>
-
-	<h5>Free-for-all variant</h5>
-	<p>
-		<div style="display:inline-block; text-align:center; padding:0 1rem;">
-			R Y G C B M
-			<br><img src="{% static 'img/variant-r.svg' %}" />
-		</div>
-		{% comment %}
 		<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
 			<logo :x=0 :y=0 :size=50 />
 
@@ -241,7 +238,7 @@
 
 	<h3 id="winning" class="orbitron">Winning</h3>
 	<p>
-		The first player who connects their side of the board to the opposite side, via adjacent spaces containing their color, is the winner.
+		The first color that connects its side of the board to the opposite side, via adjacent spaces containing that color, is the winner.
 		The color that makes such a connection wins the game for the whole team.
 	</p>
 	<p>

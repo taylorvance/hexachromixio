@@ -19,6 +19,7 @@
 				<tr>
 					<th align="right">pk</th>
 					<th>UID</th>
+					<th>Author</th>
 					<th>Variant</th>
 					<th align="right"># Moves</th>
 					<th>Result</th>
@@ -32,6 +33,7 @@
 						<th style="font-family: 'Lucida Console', Monaco, monospace">
 							<a href="/game/{{ game.uid }}">{{ game.uid }}</a>
 						</th>
+						<th>{{ game.author.username }}</th>
 						<th>{{ game.get_variant_display }}</th>
 						<th align="right">{{ game.moves | length }}</th>
 						<th>{{ game.result }}</th>
