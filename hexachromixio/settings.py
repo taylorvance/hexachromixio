@@ -28,7 +28,6 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '2s^(7p_(p)hn8f+k8(n+s&!2^y+zwb
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
-ADMINS = [('Taylor Vance', 'tmax8908@yahoo.com')]
 
 ALLOWED_HOSTS = ['.hexachromix.io', 'hexachromix.herokuapp.com', '127.0.0.1']
 # ALLOWED_HOSTS.append('localhost')
