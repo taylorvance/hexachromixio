@@ -10,17 +10,15 @@
 
 <div class="content" style="max-width:40rem">
 	<p>
-		Hexachromix is a color mixing strategy game.
+		<strong>Hexachromix</strong> is a color mixing strategy game.
 		The goal is to connect opposite sides of the board using your color.
 	</p>
 
 
 	<h3 id="terminology" class="orbitron">Terminology</h3>
-	<ul>
-		<li>RGB&nbsp;&nbsp;&ndash;&nbsp;&nbsp;Red, Green, Blue</li>
-		<li>CMY&nbsp;&nbsp;&ndash;&nbsp;&nbsp;Cyan, Magenta, Yellow</li>
-		<li>Color system&nbsp;&nbsp;&ndash;&nbsp;&nbsp;One of the above sets of three colors</li>
-	</ul>
+	<strong>RGB:</strong>&nbsp;&nbsp;Red, Green, Blue
+	<br><strong>CMY:</strong>&nbsp;&nbsp;Cyan, Magenta, Yellow
+	<br><strong>Color system:</strong>&nbsp;&nbsp;One of the above sets of three colors
 
 
 	<h3 id="mixology" class="orbitron">Mixology</h3>
@@ -76,45 +74,48 @@
 
 	<p>
 		<h5>There are three kinds of moves:</h5>
-		<ul>
-			<li>
-				<b>Claim</b> an empty space
-				<br><img src="{% static 'img/move-claim.svg' %}" />
-			</li>
-			<li>
-				<b>Share</b> a space with <i>exactly one</i> of the other colors from the <i>same color system</i>
-				<p class="help">This applies whether or not the other color is on your team.</p>
-				<img src="{% static 'img/move-share-1.svg' %}" />
-				<br><img src="{% static 'img/move-share-2.svg' %}" />
-			</li>
-			<li>
-				<b>Mix</b> a space containing <i>both</i> of the colors from the <i>other color system</i> which, when mixed, produce your color
-				<p class="help">This applies whether or not the colors are on your team.</p>
-				<img src="{% static 'img/move-mix.svg' %}" />
-				{% comment %}
-				<svg width="120" height="60" viewbox="0 0 25 10">
-					<space :x=5 :y=5 :size=5 />
-					<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
-					<space :x=20 :y=5 char="R" :size=5 />
-				</svg>
-				<svg width="120" height="60" viewbox="0 0 25 10">
-					<space :x=5 :y=5 char="G" :size=5 />
-					<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
-					<space :x=20 :y=5 char="y" :size=5 />
-				</svg>
-				<svg width="120" height="60" viewbox="0 0 25 10">
-					<space :x=5 :y=5 char="B" :size=5 />
-					<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
-					<space :x=20 :y=5 char="m" :size=5 />
-				</svg>
-				<svg width="120" height="60" viewbox="0 0 25 10">
-					<space :x=5 :y=5 char="r" :size=5 />
-					<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
-					<space :x=20 :y=5 char="R" :size=5 />
-				</svg>
-				{% endcomment %}
-			</li>
-		</ul>
+
+		<p>
+			<div><strong>Claim</strong> an empty space</div>
+			<img src="{% static 'img/move-claim.svg' %}" />
+		</p>
+
+		<p>
+			<div><strong>Share</strong> a space with <em>exactly one</em> of the other colors from the <em>same color system</em></div>
+			<div class="help">This applies whether or not the other color is on your team.</div>
+			<img src="{% static 'img/move-share-1.svg' %}" />
+			<br>
+			<img src="{% static 'img/move-share-2.svg' %}" />
+		</p>
+
+		<p>
+			<div><strong>Mix</strong> a space containing <em>both</em> of the colors from the <em>other color system</em> which, when combined, produce your color</div>
+			<div class="help">This applies whether or not the colors are on your team.</div>
+			<img src="{% static 'img/move-mix.svg' %}" />
+		</p>
+
+		{% comment %}
+		<svg width="120" height="60" viewbox="0 0 25 10">
+			<space :x=5 :y=5 :size=5 />
+			<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
+			<space :x=20 :y=5 char="R" :size=5 />
+		</svg>
+		<svg width="120" height="60" viewbox="0 0 25 10">
+			<space :x=5 :y=5 char="G" :size=5 />
+			<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
+			<space :x=20 :y=5 char="y" :size=5 />
+		</svg>
+		<svg width="120" height="60" viewbox="0 0 25 10">
+			<space :x=5 :y=5 char="B" :size=5 />
+			<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
+			<space :x=20 :y=5 char="m" :size=5 />
+		</svg>
+		<svg width="120" height="60" viewbox="0 0 25 10">
+			<space :x=5 :y=5 char="r" :size=5 />
+			<line x1="10.5" y1="5" x2="12.5" y2="5" stroke="#555" stroke-width="1" /><path d="M12.5 3 L14.5 5 L12.5 7 Z" fill="#555" />
+			<space :x=20 :y=5 char="R" :size=5 />
+		</svg>
+		{% endcomment %}
 	</p>
 
 

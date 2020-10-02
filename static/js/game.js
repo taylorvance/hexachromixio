@@ -391,7 +391,7 @@ var app = new Vue({
 		if(IS_LIVE !== false) {
 			var game_uid = JSON.parse(document.getElementById('GAMEUID').textContent)
 
-			this.socket = new ReconnectingWebSocket('ws://' + window.location.host + '/ws/play/' + game_uid + '/')
+			this.socket = new ReconnectingWebSocket('ws://' + window.location.hostname + ':8000/ws/play/' + game_uid + '/')
 			this.socket.onopen = this.socket_opened
 			this.socket.onclose = this.socket_closed
 			this.socket.onmessage = this.socket_message
@@ -401,6 +401,7 @@ var app = new Vue({
 	computed: {
 		hfen: function() { return store.state.hfen },
 		currentColor: function() { return store.getters.currentColor },
+		colorPlayers: function() { return store.state.colorPlayers },
 		isMyTurn: function() {
 			return store.state.colorPlayers[this.currentColor] == this.pid
 		},

@@ -35,6 +35,19 @@
 			</div>
 
 			<div class="column">
+				<div class="card">
+					<header class="card-header">
+						<p class="card-header-title">
+							Game {{ game.uid }}
+						</p>
+					</header>
+					<div class="card-content">
+						<div class="content">
+							Variant: {{ game.get_variant_display }}
+						</div>
+					</div>
+				</div>
+
 				<div v-if="!termination_message" class="card">
 					<header class="card-header">
 						<p class="card-header-title">
@@ -55,18 +68,19 @@
 					</div>
 				</div>
 
-				{% if user.username == 'taylorvance' %}
+				{% if request.GET.debug == '1' or user.username == 'taylorvance' %}
 					<div class="card">
 						<header class="card-header">
 							<p class="card-header-title">Debug</p>
 						</header>
 						<div class="card-content">
-							<div class="content" style='font-size: 0.8em; font-family: "Lucida Console", Monaco, monospace;'>
-								hfen: [[ hfen ]]<br>
-								created: {{ game.datetime_created }}<br>
+							<div class="help" style='font-family: "Lucida Console", Monaco, monospace'>
 								game id: {{ game.id }}<br>
-								uid: {{ game.uid }}<br>
+								hfen: [[ hfen ]]<br>
 								pid: [[ pid ]]<br>
+								{% for c in 'RYGCBM' %}
+									{{ c }}: [[ colorPlayers['{{ c }}'] ]]<br>
+								{% endfor %}
 							</div>
 						</div>
 					</div>
@@ -75,7 +89,6 @@
 		</div>
 	</div>
 
-	{% comment %}<link rel="stylesheet" href="{% static "css/hexachromix-board.css" %}">{% endcomment %}
 	<script src="{% static "js/game.js" %}"></script>
 </div>
 {% endblock content %}
