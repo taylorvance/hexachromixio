@@ -37,6 +37,9 @@
 						{{ variant.teams }} teams
 						<br>
 						{{ variant.players }} players
+						{% if variant.value == 'RGB' %}
+							<div class="help">This variant is unbalanced<br>and may be removed.</div>
+						{% endif %}
 					</div>
 
 					<div class="card-footer" style="text-align:center">
