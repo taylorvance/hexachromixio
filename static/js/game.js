@@ -391,7 +391,7 @@ var app = new Vue({
 		if(IS_LIVE !== false) {
 			var game_uid = JSON.parse(document.getElementById('GAMEUID').textContent)
 
-			this.socket = new ReconnectingWebSocket('wss://' + window.location.hostname + ':8001/ws/play/' + game_uid + '/')
+			this.socket = new ReconnectingWebSocket('ws://' + window.location.hostname + ':8001/ws/play/' + game_uid + '/')
 			this.socket.onopen = this.socket_opened
 			this.socket.onclose = this.socket_closed
 			this.socket.onmessage = this.socket_message
