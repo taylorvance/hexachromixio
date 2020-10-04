@@ -37,6 +37,9 @@ def signup(request):
 @login_required
 def profile(request):
     # All games the user created or played
-    games = Game.objects.filter(Q(author=request.user) | Q(move__player=request.user)).order_by('-datetime_created').distinct()
+    if request.user.username == 'taylorvance':
+        games = Game.objects.all().order_by('-datetime_created')
+    else:
+        games = Game.objects.filter(Q(author=request.user) | Q(move__player=request.user)).order_by('-datetime_created').distinct()
 
     return render(request, 'profile.html', {'games': games})
