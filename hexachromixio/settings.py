@@ -37,7 +37,8 @@ ALLOWED_HOSTS = ['.hexachromix.io', 'hexachromix.herokuapp.com', '0.0.0.0', '127
 # Application definition
 
 INSTALLED_APPS = [
-    'hexachromix.apps.HexachromixConfig',
+    'hexachromix',
+    'friends',
     'channels',
     'django.contrib.admin',
     'django.contrib.auth',

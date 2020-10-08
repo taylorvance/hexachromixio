@@ -5,6 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Q
 
 from hexachromix.models import Game, GamePlayer
+from friends.models import FriendRequest
 
 
 def home(request):
@@ -43,4 +44,15 @@ def profile(request):
         # All games the user created or played
         games = Game.objects.filter(Q(author=request.user) | Q(gameplayer__player=request.user) | Q(move__player=request.user)).order_by('-datetime_created').distinct()
 
-    return render(request, 'profile.html', {'games': games})
+    friends = request.user.friend_requesters.filter(status=FriendRequest.Status.YES)
+    friends = friends.union(request.user.friend_responders.filter(status=FriendRequest.Status.YES))
+    for friend in friends:
+        friend.other_user = friend.responder.username if request.user.pk == friend.requester.pk else friend.requester.username
+    friends = sorted(friends, key=lambda x: x.other_user)
+
+    return render(request, 'profile.html', {
+        'games': games,
+        'friends': friends,
+        'pending_you': request.user.friend_responders.filter(status__isnull=True).order_by('requester__username'),
+        'pending_them': request.user.friend_requesters.filter(status__isnull=True).order_by('responder__username'),
+    })

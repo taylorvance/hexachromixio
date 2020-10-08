@@ -3,7 +3,77 @@
 {% block title %}Profile - Hexachromix{% endblock %}
 
 {% block content %}
+<script src="https://kit.fontawesome.com/7429ed9b88.js" crossorigin="anonymous"></script>
+
 <div class="content">
+	{% if False %}
+	<form action="/friends" method="post">
+		{% csrf_token %}
+
+		<div class="columns">
+			<div class="column is-narrow">
+				<h4>Friends</h4>
+				<table class="table is-narrow">
+					{% for friend in friends %}
+						<tr>
+							<td>{{ friend.other_user }}</td>
+							<td class="has-text-right" style="padding-left:3rem">
+								<span class="icon" style="cursor:pointer; color:#555;">
+									<i class="fas fa-minus-circle" title="Remove friend"></i>
+								</span>
+							</td>
+						</tr>
+					{% endfor %}
+				</table>
+
+				<h6>Send a friend request</h6>
+				<div style="width:100%">
+					<input type="text" class="input is-small" style="width:auto">
+					<span class="icon is-medium" style="cursor:pointer; color:#555;">
+						<i class="fas fa-plus-circle" title="Send friend request"></i>
+					</span>
+				</div>
+			</div>
+
+			<div class="column is-narrow">
+				<table class="table is-narrow">
+					{% if pending_you %}
+						<tr><th colspan="2" class="has-text-left" style="padding-top:1rem">Friend Requests</th></tr>
+						{% for fr in pending_you %}
+							<tr>
+								<td>{{ fr.requester.username }}</td>
+								<td class="has-text-right" style="padding-left:3rem">
+									<span class="icon" style="cursor:pointer; color:#555;">
+										<i class="fas fa-check-circle" title="Accept friend request"></i>
+									</span>
+									<span class="icon" style="cursor:pointer; color:#555;">
+										<i class="fas fa-times-circle" title="Reject friend request"></i>
+									</span>
+								</td>
+							</tr>
+						{% endfor %}
+					{% endif %}
+
+					{% if pending_them %}
+						<tr><th colspan="2" class="has-text-left" style="padding-top:1rem">Pending Requests</th></tr>
+						{% for fr in pending_them %}
+							<tr>
+								<td>{{ fr.responder.username }}</td>
+								<td class="has-text-right" style="padding-left:3rem">
+									<span class="icon" style="cursor:pointer; color:#555;">
+										<i class="fas fa-minus-circle" title="Cancel friend request"></i>
+									</span>
+								</td>
+							</tr>
+						{% endfor %}
+					{% endif %}
+				</table>
+			</div>
+		</div>
+	</form>
+
+	<br>
+	{% endif %}
 	<h4>Games</h4>
 	<div class="table-container">
 		<table class="table has-text-left">
