@@ -68,7 +68,7 @@
 					</div>
 				</div>
 
-				{% if request.GET.debug == '1' or user.username == 'taylorvance' %}
+				{% if request.GET.debug == '1' or user.is_superuser %}
 					<div class="card">
 						<header class="card-header">
 							<p class="card-header-title">Debug</p>

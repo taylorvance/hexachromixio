@@ -4,7 +4,7 @@ from django.core.cache import cache
 import json
 import hashlib, uuid
 
-from hexachromix.models import Game, Move
+from hexachromix.models import Game, Move, GamePlayer
 
 class PlayConsumer(WebsocketConsumer):
     def connect(self):
@@ -23,6 +23,7 @@ class PlayConsumer(WebsocketConsumer):
         # Generate an identifier for this player so they can reconnect and maintain color control
         if self.scope['user'].is_authenticated:
             # This allows a user to maintain colors across devices
+            # If this changes, update get_color_players()
             self.player_identifier = self.scope['user'].username
         elif self.scope['session'].session_key:
             # Hash based on ses key, game uid, and salt
@@ -43,7 +44,7 @@ class PlayConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps({
             'pid': self.player_identifier,
             'hfen': game.hfen,
-            'color_players': cache.get('game_%s_colors' % self.game_uid, {}),
+            'color_players': self.get_color_players(),
         }))
 
         state = Game.state_from_hfen(game.hfen)
@@ -66,8 +67,14 @@ class PlayConsumer(WebsocketConsumer):
         if text_data_json['action'] == 'claim_color':
             color = Move.Color[text_data_json['color']]
 
-            cache_key = 'game_%s_colors' % self.game_uid
-            cache_val = cache.get(cache_key, {})
+            # Did they ask for a valid color?
+            if not color:
+                self.send(text_data=json.dumps({
+                    'error': 'INVALID_COLOR',
+                }))
+                return
+
+            cache_val = self.get_color_players()
 
             # Is the color available?
             if cache_val.get(color) and cache_val.get(color) != self.player_identifier:
@@ -83,8 +90,12 @@ class PlayConsumer(WebsocketConsumer):
                 }))
                 return
 
+            # Set that color-player in the db and the cache
+            if self.scope['user'].is_authenticated:
+                GamePlayer.objects.create(game=Game.objects.get(uid=self.game_uid), player=self.scope['user'], color=color)
             cache_val[color] = self.player_identifier
-            cache.set(cache_key, cache_val, 3600)
+
+            cache.set('game_%s_colors' % self.game_uid, cache_val, 3600)
 
             async_to_sync(self.channel_layer.group_send)(
                 self.group_name,
@@ -96,8 +107,7 @@ class PlayConsumer(WebsocketConsumer):
         elif text_data_json['action'] == 'release_color':
             color = Move.Color[text_data_json['color']]
 
-            cache_key = 'game_%s_colors' % self.game_uid
-            cache_val = cache.get(cache_key, {})
+            cache_val = self.get_color_players()
 
             # Does the player control that color?
             if cache_val.get(color) != self.player_identifier:
@@ -106,8 +116,12 @@ class PlayConsumer(WebsocketConsumer):
                 }))
                 return
 
-            cache_val[color] = None
-            cache.set(cache_key, cache_val, 3600)
+            # Delete that color-player from the db and the cache
+            if self.scope['user'].is_authenticated:
+                GamePlayer.objects.get(color=color, game__uid=self.game_uid).delete()
+            del cache_val[color]
+
+            cache.set('game_%s_colors' % self.game_uid, cache_val, 3600)
 
             async_to_sync(self.channel_layer.group_send)(
                 self.group_name,
@@ -124,6 +138,7 @@ class PlayConsumer(WebsocketConsumer):
                 }))
                 return
 
+            GamePlayer.objects.filter(game__uid=self.game_uid).delete()
             cache.delete('game_%s_colors' % self.game_uid)
 
             async_to_sync(self.channel_layer.group_send)(
@@ -232,6 +247,23 @@ class PlayConsumer(WebsocketConsumer):
                 }
             )
 
+
+    def get_color_players(self):
+        cache_key = 'game_%s_colors' % self.game_uid
+
+        cache_val = cache.get(cache_key)
+        if cache_val is not None:
+            return cache_val
+
+        cache_val = {}
+
+        gps = GamePlayer.objects.filter(game__uid=self.game_uid)
+        for gp in gps:
+            cache_val[gp.color] = gp.player.username
+
+        cache.set(cache_key, cache_val, 3600)
+
+        return cache_val
 
     def broadcast_hfen(self, event):
         self.send(text_data=json.dumps({

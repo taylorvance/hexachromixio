@@ -4,46 +4,42 @@
 
 {% block content %}
 <div class="content">
-	<p>
-		{% if user.is_authenticated %}
-			Hi {{ user.username }}.
-		{% else %}
-			Click <a href="/account/login">here</a> to log in.
-		{% endif %}
-	</p>
-
-	{% if games %}
-		<h4>Games</h4>
-		<table class="table">
+	<h4>Games</h4>
+	<div class="table-container">
+		<table class="table has-text-left">
 			<thead>
 				<tr>
-					<th align="right">pk</th>
+					{% if user.is_staff %}
+						<th align="right">pk</th>
+					{% endif %}
 					<th>UID</th>
-					<th>Author</th>
+					<th>Created By</th>
 					<th>Variant</th>
-					<th align="right"># Moves</th>
 					<th>Result</th>
+					<th>Winner</th>
+					<th align="right"># Moves</th>
 					<th>HFEN</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for game in games %}
 					<tr>
-						<th align="right">{{ game.id }}</th>
-						<th style="font-family: 'Lucida Console', Monaco, monospace">
+						{% if user.is_staff %}
+							<td align="right">{{ game.id }}</td>
+						{% endif %}
+						<td style="font-family: 'Lucida Console', Monaco, monospace">
 							<a href="/game/{{ game.uid }}">{{ game.uid }}</a>
-						</th>
-						<th>{{ game.author.username }}</th>
-						<th>{{ game.get_variant_display }}</th>
-						<th align="right">{{ game.moves | length }}</th>
-						<th>{{ game.result }}</th>
-						<th style="font-family: 'Lucida Console', Monaco, monospace">
-							{{ game.hfen }}
-						</th>
+						</td>
+						<td>{{ game.author.username }}</td>
+						<td>{{ game.get_variant_display }}</td>
+						<td>{{ game.result }}</td>
+						<td>{{ game.winner }}</td>
+						<td align="right">{{ game.moves | length }}</td>
+						<td style="font-family: 'Lucida Console', Monaco, monospace">{{ game.hfen }}</td>
 					</tr>
 				{% endfor %}
 			</tbody>
 		</table>
-	{% endif %}
+	</div>
 </div>
 {% endblock %}

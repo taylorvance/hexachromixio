@@ -51,11 +51,20 @@ class Game(models.Model):
     def result(self):
         state = self.state
         if state.did_win():
-            return 'RYGCBM'[state.prev_color_idx]
+            return Move.Color['RYGCBM'[state.prev_color_idx]]
         elif len(state.get_legal_moves()) == 0:
             return 'DRAW'
         else:
-            return 'In progress'
+            return ''
+
+    @property
+    def winner(self):
+        state = self.state
+        if state.did_win():
+            gp = GamePlayer.objects.filter(game=self, color=Move.Color['RYGCBM'[state.prev_color_idx]]).first()
+            if gp is not None:
+                return gp.player.username
+        return ''
 
     @property
     def is_active(self):
@@ -121,3 +130,9 @@ class Move(models.Model):
 
     class Meta:
         order_with_respect_to = 'game'
+
+
+class GamePlayer(models.Model):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    color = models.CharField(choices=Move.Color.choices, max_length=1)

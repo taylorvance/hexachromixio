@@ -94,6 +94,13 @@
 			<img src="{% static 'img/move-mix.svg' %}" />
 		</p>
 
+		<p class="help">
+			Note that when two pieces share a space, their overlap is a different color.
+			This is merely a visual hint for what color <em>can</em> play on that space.
+			It does not mean that the overlap color is already in that space,
+			and that space does not count toward the overlap color's paths to victory.
+		</p>
+
 		{% comment %}
 		<svg width="120" height="60" viewbox="0 0 25 10">
 			<space :x=5 :y=5 :size=5 />
