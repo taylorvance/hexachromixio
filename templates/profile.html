@@ -5,74 +5,123 @@
 {% block content %}
 <script src="https://kit.fontawesome.com/7429ed9b88.js" crossorigin="anonymous"></script>
 
+<style>
+	.fa-btn {
+		background: none;
+		border: none;
+		font-size: 1.2rem;
+		padding: 0;
+	}
+	.fa-btn span {
+		color: #666;
+		cursor: pointer;
+	}
+</style>
+
 <div class="content">
 	{% if False %}
-	<form action="/friends" method="post">
-		{% csrf_token %}
+	<div class="columns">
+		<div class="column is-narrow">
+			<form action="/friends/remove/" method="post">
+				{% csrf_token %}
 
-		<div class="columns">
-			<div class="column is-narrow">
-				<h4>Friends</h4>
 				<table class="table is-narrow">
+					<tr>
+						<th colspan="2" class="has-text-left">
+							Friends
+						</th>
+					</tr>
 					{% for friend in friends %}
 						<tr>
-							<td>{{ friend.other_user }}</td>
+							<td>{{ friend.username }}</td>
 							<td class="has-text-right" style="padding-left:3rem">
-								<span class="icon" style="cursor:pointer; color:#555;">
-									<i class="fas fa-minus-circle" title="Remove friend"></i>
-								</span>
+								<button type="submit" class="fa-btn" name="upk" value="{{ friend.pk }}">
+									<span class="icon">
+										<i class="fas fa-minus-circle" title="Remove friend"></i>
+									</span>
+								</button>
 							</td>
 						</tr>
 					{% endfor %}
 				</table>
+			</form>
 
-				<h6>Send a friend request</h6>
+			<br>
+			<h6>Send a friend request</h6>
+			<form action="/friends/request/" method="post" style="display:inline; padding:0;">
+				{% csrf_token %}
+
 				<div style="width:100%">
-					<input type="text" class="input is-small" style="width:auto">
-					<span class="icon is-medium" style="cursor:pointer; color:#555;">
-						<i class="fas fa-plus-circle" title="Send friend request"></i>
-					</span>
+					<input type="text" class="input is-small" name="name" style="width:auto">
+
+					<button type="submit" class="fa-btn">
+						<span class="icon is-medium">
+							<i class="fas fa-plus-circle" title="Send friend request"></i>
+						</span>
+					</button>
 				</div>
-			</div>
-
-			<div class="column is-narrow">
-				<table class="table is-narrow">
-					{% if pending_you %}
-						<tr><th colspan="2" class="has-text-left" style="padding-top:1rem">Friend Requests</th></tr>
-						{% for fr in pending_you %}
-							<tr>
-								<td>{{ fr.requester.username }}</td>
-								<td class="has-text-right" style="padding-left:3rem">
-									<span class="icon" style="cursor:pointer; color:#555;">
-										<i class="fas fa-check-circle" title="Accept friend request"></i>
-									</span>
-									<span class="icon" style="cursor:pointer; color:#555;">
-										<i class="fas fa-times-circle" title="Reject friend request"></i>
-									</span>
-								</td>
-							</tr>
-						{% endfor %}
-					{% endif %}
-
-					{% if pending_them %}
-						<tr><th colspan="2" class="has-text-left" style="padding-top:1rem">Pending Requests</th></tr>
-						{% for fr in pending_them %}
-							<tr>
-								<td>{{ fr.responder.username }}</td>
-								<td class="has-text-right" style="padding-left:3rem">
-									<span class="icon" style="cursor:pointer; color:#555;">
-										<i class="fas fa-minus-circle" title="Cancel friend request"></i>
-									</span>
-								</td>
-							</tr>
-						{% endfor %}
-					{% endif %}
-				</table>
-			</div>
+			</form>
 		</div>
-	</form>
 
-	<br>
+		<div class="column is-narrow">
+			<table class="table is-narrow">
+				{% if pending_you %}
+					<tr>
+						<th colspan="2" class="has-text-left">
+							Friend Requests
+						</th>
+					</tr>
+					{% for fr in pending_you %}
+						<tr>
+							<td>{{ fr.requester.username }}</td>
+							<td class="has-text-right" style="padding-left:3rem">
+								<form action="/friends/accept/" method="post" style="display:inline; padding:0;">
+									{% csrf_token %}
+									<button type="submit" class="fa-btn" name="frpk" value="{{ fr.pk }}">
+										<span class="icon">
+											<i class="fas fa-check-circle" title="Accept friend request"></i>
+										</span>
+									</button>
+								</form>
+								<form action="/friends/decline/" method="post" style="display:inline; padding:0;">
+									{% csrf_token %}
+									<button type="submit" class="fa-btn" name="frpk" value="{{ fr.pk }}">
+										<span class="icon">
+											<i class="fas fa-times-circle" title="Reject friend request"></i>
+										</span>
+									</button>
+								</form>
+							</td>
+						</tr>
+					{% endfor %}
+				{% endif %}
+
+				{% if pending_them %}
+					<tr>
+						<th colspan="2" class="has-text-left">
+							Pending Requests
+						</th>
+					</tr>
+					{% for fr in pending_them %}
+						<tr>
+							<td>{{ fr.responder.username }}</td>
+							<td class="has-text-right" style="padding-left:3rem">
+								<form action="/friends/cancel/" method="post">
+									{% csrf_token %}
+									<button type="submit" class="fa-btn" name="frpk" value="{{ fr.pk }}">
+										<span class="icon">
+											<i class="fas fa-minus-circle" title="Cancel friend request"></i>
+										</span>
+									</button>
+								</form>
+							</td>
+						</tr>
+					{% endfor %}
+				{% endif %}
+			</table>
+		</div>
+	</div>
+
 	{% endif %}
 	<h4>Games</h4>
 	<div class="table-container">

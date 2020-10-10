@@ -24,6 +24,7 @@ urlpatterns = [
     path('rules/', TemplateView.as_view(template_name='rules.html')),
 
     path('game/', include('hexachromix.urls')),
+    path('friends/', include('friends.urls')),
 
     path('signup/', views.signup, name='signup'),
 

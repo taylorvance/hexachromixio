@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from django.db.models import Q
+from django.contrib.auth import get_user_model
 
 from time import time
 import random
@@ -136,3 +138,11 @@ class GamePlayer(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     color = models.CharField(choices=Move.Color.choices, max_length=1)
+
+
+# Extend the User model with a helper method to find all of their games
+# Games where they are the author, a game-player, or a move-player
+def games_for_user(self):
+    return Game.objects.filter(Q(author=self) | Q(gameplayer__player=self) | Q(move__player=self)).distinct()
+User = get_user_model()
+User.add_to_class('hexachromix_games', games_for_user)

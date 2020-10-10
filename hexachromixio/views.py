@@ -38,21 +38,13 @@ def signup(request):
 @login_required
 def profile(request):
     if request.user.is_superuser:
-        # All games
         games = Game.objects.all().order_by('-datetime_created')
     else:
-        # All games the user created or played
-        games = Game.objects.filter(Q(author=request.user) | Q(gameplayer__player=request.user) | Q(move__player=request.user)).order_by('-datetime_created').distinct()
-
-    friends = request.user.friend_requesters.filter(status=FriendRequest.Status.YES)
-    friends = friends.union(request.user.friend_responders.filter(status=FriendRequest.Status.YES))
-    for friend in friends:
-        friend.other_user = friend.responder.username if request.user.pk == friend.requester.pk else friend.requester.username
-    friends = sorted(friends, key=lambda x: x.other_user)
+        games = request.user.hexachromix_games().order_by('-datetime_created')
 
     return render(request, 'profile.html', {
         'games': games,
-        'friends': friends,
-        'pending_you': request.user.friend_responders.filter(status__isnull=True).order_by('requester__username'),
-        'pending_them': request.user.friend_requesters.filter(status__isnull=True).order_by('responder__username'),
+        'friends': request.user.friends(),
+        'pending_you': FriendRequest.pending_requests_to_user(request.user).order_by('requester__username'),
+        'pending_them': FriendRequest.pending_requests_from_user(request.user).order_by('responder__username'),
     })
