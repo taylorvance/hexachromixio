@@ -19,7 +19,10 @@ def home(request):
             'players': '%d%s' % (num, '+' if num < 6 else ''),
         })
 
-    return render(request, 'home.html', {'variants': variants})
+    return render(request, 'home.html', {
+        'variants': variants,
+        'my_turn': None if not request.user.is_authenticated else request.user.hexachromix_games_my_turn(),
+    })
 
 def signup(request):
     if request.method == 'POST':

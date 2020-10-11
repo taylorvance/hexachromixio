@@ -3,20 +3,9 @@
 {% block title %}Hexachromix - {{ game.uid }}{% endblock %}
 
 {% block content %}
-{% comment %}<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.min.js"></script>{% endcomment %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.common.dev.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/3.5.1/vuex.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script>
-
-<script src="https://kit.fontawesome.com/7429ed9b88.js" crossorigin="anonymous"></script>
-
 {% load static %}
 
 <div class="content">
-	<script> var IS_LIVE = true </script>
-	{{ game.uid | json_script:"GAMEUID" }}
-
 	<div id="app">
 		<div class="columns is-desktop">
 			<div class="column" style="text-align:center">
@@ -88,7 +77,20 @@
 			</div>
 		</div>
 	</div>
-
-	<script src="{% static "js/game.js" %}"></script>
 </div>
 {% endblock content %}
+
+
+{% block scripts %}
+{% comment %}<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.min.js"></script>{% endcomment %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.common.dev.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/3.5.1/vuex.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script>
+
+<script src="https://kit.fontawesome.com/7429ed9b88.js" crossorigin="anonymous"></script>
+
+<script> var IS_LIVE = true </script>
+{{ game.uid | json_script:"GAMEUID" }}
+<script src="{% static "js/game.js" %}"></script>
+{% endblock scripts %}

@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from django.utils.functional import cached_property
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 
@@ -73,6 +74,10 @@ class Game(models.Model):
         return not self.state.is_terminal()
 
     @property
+    def current_color(self):
+        return Move.Color[self.state.get_current_color()]
+
+    @property
     def hpgn(self):
         hpgn = ''
         hpgn += '[Sometag "some value"]'
@@ -85,7 +90,7 @@ class Game(models.Model):
 
         return hpgn
 
-    @property
+    @cached_property
     def hfen(self):
         state = HexachromixState(variant=self.variant)
 
@@ -94,7 +99,7 @@ class Game(models.Model):
 
         return state.hfen
 
-    @property
+    @cached_property
     def state(self):
         return self.state_from_hfen(self.hfen)
 
@@ -142,7 +147,18 @@ class GamePlayer(models.Model):
 
 # Extend the User model with a helper method to find all of their games
 # Games where they are the author, a game-player, or a move-player
+User = get_user_model()
+
 def games_for_user(self):
     return Game.objects.filter(Q(author=self) | Q(gameplayer__player=self) | Q(move__player=self)).distinct()
-User = get_user_model()
 User.add_to_class('hexachromix_games', games_for_user)
+
+def games_my_turn(self):
+    my_turn = []
+    for game in Game.objects.filter(gameplayer__player=self).distinct().order_by('-datetime_created'):
+        state = game.state
+        gp = GamePlayer.objects.filter(game=game, color=state.get_current_color(), player=self).first()
+        if gp and not state.is_terminal():
+            my_turn.append(game)
+    return my_turn
+User.add_to_class('hexachromix_games_my_turn', games_my_turn)

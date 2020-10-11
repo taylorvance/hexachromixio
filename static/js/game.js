@@ -402,9 +402,7 @@ var app = new Vue({
 		hfen: function() { return store.state.hfen },
 		currentColor: function() { return store.getters.currentColor },
 		colorPlayers: function() { return store.state.colorPlayers },
-		isMyTurn: function() {
-			return store.state.colorPlayers[this.currentColor] == this.pid
-		},
+		isMyTurn: function() { return store.state.colorPlayers[this.currentColor] == this.pid },
 	},
 	methods: {
 		socket_opened: function(e) {
