@@ -90,6 +90,10 @@ class Game(models.Model):
 
         return hpgn
 
+    @property
+    def players(self):
+        return get_user_model().objects.filter(gameplayer__game=self).distinct()
+
     @cached_property
     def hfen(self):
         state = HexachromixState(variant=self.variant)

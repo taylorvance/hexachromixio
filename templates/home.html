@@ -10,16 +10,28 @@
 
 		<div id="app">
 			{% for game in my_turn %}
-				<div class="card is-inline-block">
-					<div class="card-content" style="text-align:center">
+				<div class="card is-inline-block" style="vertical-align:top">
+					<header class="card-header">
+						<p class="card-header-title">
+							<a href="/game/{{ game.uid }}">{{ game.uid }}</a>
+						</p>
+					</header>
 
-						<div><a href="/game/{{ game.uid }}">{{ game.uid }}</a></div>
-						<div>{{ game.get_variant_display }}</div>
-						<div>{{ game.current_color.label }}</div>
+					<div class="card-content" style="text-align:center; padding:0.5rem;">
+						<div style="font-size:0.9rem; line-height:1rem;">
+							{{ game.get_variant_display }}
+							<br>{{ game.current_color.label }}
+						</div>
 
-						<svg width="100" height="100" viewbox="0 0 100 100">
+						<svg width="100" height="100" viewbox="0 0 100 100" style="margin-bottom:-1rem">
 							<board :x=50 :y=50 :size=50 hfen="{{ game.hfen }}"/>
 						</svg>
+					</div>
+
+					<div class="card-footer help" style="padding:0.2rem 0.5rem; line-height:0.8rem;">
+						{% for player in game.players %}
+							{{ player.username }}<br>
+						{% endfor %}
 					</div>
 				</div>
 			{% endfor %}

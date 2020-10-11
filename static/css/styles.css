@@ -1,0 +1,24 @@
+body {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+footer { margin-top: auto; }
+
+#wrapper { flex: 1; }
+
+.navbar { border-bottom: 1px solid #eee; }
+.navbar-item img { max-height: 2.5rem; }
+
+.card { margin: 0.5rem; }
+
+.footer { padding: 3rem 1.5rem; }
+
+.orbitron {
+	font-family: 'Orbitron', sans-serif;
+	letter-spacing: 0.1rem;
+}
+
+.card {
+	margin-top: 0;
+}
