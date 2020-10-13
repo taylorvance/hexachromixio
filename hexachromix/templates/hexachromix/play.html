@@ -9,17 +9,13 @@
 	<div id="app">
 		<div class="columns is-desktop">
 			<div class="column" style="text-align:center">
-				<h3 class="orbitron">
-					[[ termination_message ?? colors[currentColor].name + "'s turn" ]]
-				</h3>
-
 				<svg viewbox="0 0 100 100" style="width:80vmin; height:80vmin;">
 					<circle cx="4" cy="4" r="1.25" stroke="#555" stroke-width="0.35" :fill="[[ socket_is_live ? '#0c0' : '#d00' ]]"/>
 					<text x="6.5" y="4" fill="#555" style="font-size:0.25rem; text-anchor:left; dominant-baseline:central; pointer-events:none;">
 						[[ socket_is_live ? 'Live' : 'Disconnected' ]]
 					</text>
 
-					<board :x=50 :y=55 :size=50 />
+					<board :x=50 :y=50 :size=50 />
 				</svg>
 			</div>
 
@@ -62,15 +58,16 @@
 						<header class="card-header">
 							<p class="card-header-title">Debug</p>
 						</header>
-						<div class="card-content">
-							<div class="help" style='font-family: "Lucida Console", Monaco, monospace'>
-								game id: {{ game.id }}<br>
-								hfen: [[ hfen ]]<br>
-								pid: [[ pid ]]<br>
-								{% for c in 'RYGCBM' %}
-									{{ c }}: [[ colorPlayers['{{ c }}'] ]]<br>
-								{% endfor %}
-							</div>
+						<div class="card-content help monospace">
+							game id: {{ game.id }}<br>
+							hfen: [[ hfen ]]<br>
+							pid: [[ pid ]]<br>
+							<br>
+							{% for c in 'RYGCBM' %}
+								{{ c }}: [[ colorPlayers['{{ c }}'] ]]<br>
+							{% endfor %}
+							<br>
+							<pre>{{ game.formatted_hpgn }}</pre>
 						</div>
 					</div>
 				{% endif %}

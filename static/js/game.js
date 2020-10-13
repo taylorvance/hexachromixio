@@ -34,7 +34,6 @@ var colorMixin = {
 			}
 			hue += 60
 		}
-
 		return {colors: colors}
 	},
 }
@@ -44,17 +43,15 @@ Vue.component('board', {
 	delimiters: ['[[', ']]'],
 	props: ['x', 'y', 'size', 'hfen'],
 	computed: {
-		calchfen: function() {
-			return this.hfen ?? store.state.hfen
-		},
-		spaceSize: function() {
-			return this.size / store.getters.mapRadius / 2.7
-		},
+		effective_hfen: function() { return this.hfen ?? store.state.hfen },
+		currentColor: function() { return this.effective_hfen.split(' ')[1] },
+		variant: function() { return this.effective_hfen.split(' ')[2] },
+		spaceSize: function() { return this.size / store.getters.mapRadius / 2.7 },
 		spaces: function() {
 			var radius = store.getters.mapRadius
 			var spaces = []
 
-			var chars = this.calchfen.split(' ')[0].replace(/(\d)/g, function(match) {
+			var chars = this.effective_hfen.split(' ')[0].replace(/(\d)/g, function(match) {
 				return '-'.repeat(match)
 			}).split('/').join('')
 			var i = 0
@@ -80,8 +77,7 @@ Vue.component('board', {
 		},
 	},
 	template: `<g>
-		<logo :x="x" :y="y" :size="size"/>
-
+		<logo :x="x" :y="y" :size="size" :variant="variant" :currentColor="currentColor" :showTeamsAndTurn="true"/>
 		<space v-for="space in spaces" :key="space.id" :x="space.x" :y="space.y" :q="space.q" :r="space.r" :char="space.char" :size="spaceSize"/>
 	</g>`
 })
@@ -203,8 +199,17 @@ Vue.component('piece', {
 Vue.component('logo', {
 	mixins: [colorMixin],
 	delimiters: ['[[', ']]'],
-	props: ['x', 'y', 'size'],
+	props: ['x', 'y', 'size', 'variant', 'currentColor', 'showTeamsAndTurn'],
 	methods: {
+		joinColors: function(chars) {
+			if(this.variant == 'MRY' && 'MRY GCB'.includes(chars)) {
+				return true
+			} else if(this.variant == 'MR' && 'MR YG CB'.includes(chars)) {
+				return true
+			} else {
+				return false
+			}
+		},
 		hexagonPoints: function(size) {
 			var piThirds = Math.PI / 3
 			var pts = []
@@ -223,18 +228,55 @@ Vue.component('logo', {
 			var pts = [bigHexPts[i % 6].join(','), bigHexPts[(i+1) % 6].join(','), smallHexPts[(i+1) % 6].join(','), smallHexPts[i % 6].join(',')]
 			return pts.join(' ')
 		},
+		sideCenterPoints: function(i) {
+			var piThirds = Math.PI / 3
+			var pts = []
+			for(j = 1.5; j >= -4.5; j--) {
+				pts.push([
+					this.x + this.size * 0.85 * Math.cos(j * piThirds),
+					this.y - this.size * 0.85 * Math.sin(j * piThirds),
+				])
+			}
+			return pts[i]
+		},
+		arrowPoints: function(i) {
+			var piThirds = Math.PI / 3
+			var j = 1.5 - i
+			var pointOffset = this.size * 0.92
+			var armOffset = this.size * 0.96
+			return [
+				[
+					this.x + armOffset * Math.cos((j+0.05) * piThirds),
+					this.y - armOffset * Math.sin((j+0.05) * piThirds),
+				].join(','),
+				[
+					this.x + pointOffset * Math.cos(j * piThirds),
+					this.y - pointOffset * Math.sin(j * piThirds),
+				].join(','),
+				[
+					this.x + armOffset * Math.cos((j-0.05) * piThirds),
+					this.y - armOffset * Math.sin((j-0.05) * piThirds),
+				].join(','),
+			].join(' ')
+		},
 	},
 	template: `<g>
-		<polygon :points="polygonPoints(0)" :fill="colors.R.normal"/>
-		<polygon :points="polygonPoints(1)" :fill="colors.Y.normal"/>
-		<polygon :points="polygonPoints(2)" :fill="colors.G.normal"/>
-		<polygon :points="polygonPoints(3)" :fill="colors.C.normal"/>
-		<polygon :points="polygonPoints(4)" :fill="colors.B.normal"/>
-		<polygon :points="polygonPoints(5)" :fill="colors.M.normal"/>
+		<polygon v-for="(char, idx) in 'RYGCBM'" :points="polygonPoints(idx)" :fill="colors[char].normal"/>
 
-		<line :x1="hexagonPoints(size)[0][0]" :y1="hexagonPoints(size)[0][1]" :x2="hexagonPoints(size)[3][0]" :y2="hexagonPoints(size)[3][1]" stroke="#fff" :stroke-width="size/10"/>
-		<line :x1="hexagonPoints(size)[1][0]" :y1="hexagonPoints(size)[1][1]" :x2="hexagonPoints(size)[4][0]" :y2="hexagonPoints(size)[4][1]" stroke="#fff" :stroke-width="size/10"/>
-		<line :x1="hexagonPoints(size)[2][0]" :y1="hexagonPoints(size)[2][1]" :x2="hexagonPoints(size)[5][0]" :y2="hexagonPoints(size)[5][1]" stroke="#fff" :stroke-width="size/10"/>
+		<g v-if="showTeamsAndTurn">
+			<g v-for="(chars, idx) in ['MR','RY','YG','GC','CB','BM']" v-if="!joinColors(chars)">
+				<line :x1="x" :y1="y" :x2="hexagonPoints(size)[idx][0]" :y2="hexagonPoints(size)[idx][1]" stroke="#fff" :stroke-width="size/10"/>
+				<line v-if="false" :x1="x" :y1="y" :x2="hexagonPoints(size)[idx][0]" :y2="hexagonPoints(size)[idx][1]" stroke="#555" :stroke-width="size/20"/>
+			</g>
+
+			<g v-for="(char, idx) in 'RYGCBM'" v-if="currentColor==char">
+				<polyline :points="arrowPoints(idx)" stroke="#555" :stroke-width="size/25" fill="none"/>
+				<polyline v-if="true" :points="arrowPoints(idx)" :stroke="colors[char].normal" :stroke-width="size/90" fill="none"/>
+			</g>
+		</g>
+		<g v-else>
+			<line v-for="idx in [0,1,2]" :x1="hexagonPoints(size)[idx][0]" :y1="hexagonPoints(size)[idx][1]" :x2="hexagonPoints(size)[idx+3][0]" :y2="hexagonPoints(size)[idx+3][1]" stroke="#fff" :stroke-width="size/10"/>
+		</g>
 	</g>`
 })
 
@@ -354,7 +396,7 @@ Vue.component('move-browser', {
 		<span class="icon is-large" v-on:click="next" v-on:keyup.right="next" style="cursor:pointer"><i class="fas fa-2x fa-angle-right"></i></span>
 		<span class="icon is-large" v-on:click="last" style="cursor:pointer"><i class="fas fa-2x fa-angle-double-right"></i></span>
 
-		<div style=" font-family:'Lucida Console',Monaco,monospace; white-space:nowrap; text-align:left">
+		<div class="monospace" style="white-space:nowrap; text-align:left;">
 			<span v-for="(move, idx) in moves" v-if="idx>0">
 				<span style="color:#aaa; font-size:0.6rem; margin-right:-0.4rem;">
 					[[ idx.toString().padStart(maxDigits, '&nbsp;') ]].

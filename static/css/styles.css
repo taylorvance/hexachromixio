@@ -5,6 +5,8 @@ body {
 }
 footer { margin-top: auto; }
 
+.footer { padding: 3rem 1.5rem; }
+
 #wrapper { flex: 1; }
 
 .navbar { border-bottom: 1px solid #eee; }
@@ -12,13 +14,16 @@ footer { margin-top: auto; }
 
 .card { margin: 0.5rem; }
 
-.footer { padding: 3rem 1.5rem; }
-
 .orbitron {
 	font-family: 'Orbitron', sans-serif;
 	letter-spacing: 0.1rem;
 }
 
-.card {
-	margin-top: 0;
+.content pre {
+	background-color: transparent;
+	padding: 0;
+}
+
+.monospace {
+	font-family: 'Lucida Console', Monaco, monospace;
 }

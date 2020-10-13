@@ -129,14 +129,13 @@
 			<thead>
 				<tr>
 					{% if user.is_staff %}
-						<th align="right">pk</th>
+						<th>pk</th>
+						<th>Author</th>
 					{% endif %}
-					<th>UID</th>
-					<th>Created By</th>
+					<th>Game ID</th>
 					<th>Variant</th>
+					<th>Players</th>
 					<th>Result</th>
-					<th>Winner</th>
-					<th align="right"># Moves</th>
 					<th>HFEN</th>
 				</tr>
 			</thead>
@@ -144,17 +143,14 @@
 				{% for game in games %}
 					<tr>
 						{% if user.is_staff %}
-							<td align="right">{{ game.id }}</td>
+							<td>{{ game.id }}</td>
+							<td>{{ game.author.username }}</td>
 						{% endif %}
-						<td style="font-family: 'Lucida Console', Monaco, monospace">
-							<a href="/game/{{ game.uid }}">{{ game.uid }}</a>
-						</td>
-						<td>{{ game.author.username }}</td>
+						<td class="monospace"><a href="/game/{{ game.uid }}">{{ game.uid }}</a></td>
 						<td>{{ game.get_variant_display }}</td>
-						<td>{{ game.result }}</td>
-						<td>{{ game.winner }}</td>
-						<td align="right">{{ game.moves | length }}</td>
-						<td style="font-family: 'Lucida Console', Monaco, monospace">{{ game.hfen }}</td>
+						<td><pre class="help" style="line-height:1rem; margin:0;">{{ game.hpgn_player_tags }}</pre></td>
+						<td>{{ game.result | default:'' }}</td>
+						<td class="monospace"><div class="help" style="margin:0">{{ game.hfen }}</div></td>
 					</tr>
 				{% endfor %}
 			</tbody>
