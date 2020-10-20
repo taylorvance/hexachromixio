@@ -5,9 +5,6 @@
 {% block content %}
 
 {% load static %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.common.dev.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/3.5.1/vuex.min.js"></script>
-
 <div class="content" style="max-width:40rem">
 	<p>
 		<strong>Hexachromix</strong> is a color mixing strategy game.
@@ -16,9 +13,11 @@
 
 
 	<h3 id="terminology" class="orbitron">Terminology</h3>
-	<strong>RGB:</strong>&nbsp;&nbsp;Red, Green, Blue
-	<br><strong>CMY:</strong>&nbsp;&nbsp;Cyan, Magenta, Yellow
-	<br><strong>Color system:</strong>&nbsp;&nbsp;One of the above sets of three colors
+	<p>
+		<b>RGB:</b>&nbsp;&nbsp;Red, Green, Blue
+		<br><b>CMY:</b>&nbsp;&nbsp;Cyan, Magenta, Yellow
+		<br><b>Color system:</b>&nbsp;&nbsp;One of the above sets of three colors
+	</p>
 
 
 	<h3 id="mixology" class="orbitron">Mixology</h3>
@@ -27,7 +26,7 @@
 		Notice how mixing two colors from the same system produces a color in the other system.
 		This is the key game mechanic of Hexachromix.
 	</p>
-	<div class="has-text-centered">
+	<p class="has-text-centered">
 		<img src="{% static 'img/venn-rgb.svg' %}" style="margin:0.5rem 1rem"/>
 		<img src="{% static 'img/venn-cmy.svg' %}" style="margin:0.5rem 1rem"/>
 		{% comment %}
@@ -50,7 +49,7 @@
 			</g>
 		</svg>
 		{% endcomment %}
-	</div>
+	</p>
 	<p class="help">
 		For more information (though it's not necessary to play the game),
 		look up <a href="https://en.wikipedia.org/wiki/Additive_color" target="_blank">additive</a>
@@ -74,33 +73,30 @@
 
 	<p>
 		<h5>There are three kinds of moves:</h5>
-
-		<p>
-			<div><strong>Claim</strong> an empty space</div>
-			<img src="{% static 'img/move-claim.svg' %}" />
-		</p>
-
-		<p>
-			<div><strong>Share</strong> a space with <em>exactly one</em> of the other colors from the <em>same color system</em></div>
-			<div class="help">This applies whether or not the other color is on your team.</div>
-			<img src="{% static 'img/move-share-1.svg' %}" />
-			<br>
-			<img src="{% static 'img/move-share-2.svg' %}" />
-		</p>
-
-		<p>
-			<div><strong>Mix</strong> a space containing <em>both</em> of the colors from the <em>other color system</em> which, when combined, produce your color</div>
-			<div class="help">This applies whether or not the colors are on your team.</div>
-			<img src="{% static 'img/move-mix.svg' %}" />
-		</p>
-
+		<div class="columns">
+			<div class="column">
+				<div><strong>Claim</strong> an empty space</div>
+				<img src="{% static 'img/move-claim.svg' %}" />
+			</div>
+			<div class="column">
+				<div><strong>Share</strong> a space with <em>exactly one</em> of the other colors from the <em>same color system</em></div>
+				<div class="help">This applies whether or not the other color is on your team.</div>
+				<img src="{% static 'img/move-share-1.svg' %}"/>
+				<br>
+				<img src="{% static 'img/move-share-2.svg' %}"/>
+			</div>
+			<div class="column">
+				<div><strong>Mix</strong> a space containing <em>both</em> of the colors from the <em>other color system</em> which, when combined, produce your color</div>
+				<div class="help">This applies whether or not the colors are on your team.</div>
+				<img src="{% static 'img/move-mix.svg' %}" />
+			</div>
+		</div>
 		<p class="help">
 			Note that when two pieces share a space, their overlap is a different color.
 			This is merely a visual hint for what color <em>can</em> play on that space.
-			It does not mean that the overlap color is already in that space;
+			It does not mean that the overlap color is <em>already</em> in that space;
 			that space does not count toward the overlap color's paths to victory.
 		</p>
-
 		{% comment %}
 		<svg width="120" height="60" viewbox="0 0 25 10">
 			<space :x=5 :y=5 :size=5 />
@@ -135,111 +131,25 @@
 		A player may control any number of colors on the same team.
 		All colors must be controlled by someone.
 	</p>
-	<p>
-		In the diagrams below, teams are designated by different-colored lines.
-	</p>
-
-	<h5>3v3 variants</h5>
-	<p>
-		<div style="display:inline-block; text-align:center; padding:0 1rem;">
-			MRY GCB
-			<br><img src="{% static 'img/variant-mry.svg' %}" />
+	<div class="columns">
+		<div class="column" style="text-align:center">
+			<div class="orbitron">MRY GCB</div>
+			<div class="help">2 teams<br>2+ players</div>
+			<img width="128" height="128" src="{% static 'img/variant-mry.svg' %}"/>
 		</div>
-		<div style="display:inline-block; text-align:center; padding:0 1rem;">
-			RGB CMY
-			<div class="help">[deprecated]</div>
-			<img src="{% static 'img/variant-rgb.svg' %}" />
+
+		<div class="column" style="text-align:center">
+			<div class="orbitron">MR YG CB</div>
+			<div class="help">3 teams<br>3+ players</div>
+			<img width="128" height="128" src="{% static 'img/variant-mr.svg' %}"/>
 		</div>
-	</p>
 
-	<h5>2v2v2 variants</h5>
-	<p>
-		<div style="display:inline-block; text-align:center; padding:0 1rem;">
-			MR YG CB
-			<br><img src="{% static 'img/variant-mr.svg' %}" />
+		<div class="column" style="text-align:center">
+			<div class="orbitron">R Y G C B M</div>
+			<div class="help">Free-for-all<br>6 players</div>
+			<img width="128" height="128" src="{% static 'img/variant-r.svg' %}"/>
 		</div>
-		<div style="display:inline-block; text-align:center; padding:0 1rem;">
-			RC BY GM
-			<div class="help">[deprecated]</div>
-			<img src="{% static 'img/variant-rc.svg' %}" />
-		</div>
-	</p>
-
-	<h5>Free-for-all variant</h5>
-	<p>
-		<div style="display:inline-block; text-align:center; padding:0 1rem;">
-			R Y G C B M
-			<br><img src="{% static 'img/variant-r.svg' %}" />
-		</div>
-		{% comment %}
-		<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
-			<logo :x=0 :y=0 :size=50 />
-
-			<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
-			<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
-
-			<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.C.normal" stroke-width="4" />
-			<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.C.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.C.normal" stroke-width="4" />
-
-			<circle cx="0" cy="0" r="4" fill="white"/>
-		</svg>
-		<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
-			<logo :x=0 :y=0 :size=50 />
-
-			<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
-
-			<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.C.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.C.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.C.normal" stroke-width="4" />
-
-			<circle cx="0" cy="0" r="4" fill="white"/>
-		</svg>
-		<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
-			<logo :x=0 :y=0 :size=50 />
-
-			<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
-			<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
-
-			<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
-
-			<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.B.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.B.normal" stroke-width="4" />
-
-			<circle cx="0" cy="0" r="4" fill="white"/>
-		</svg>
-		<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
-			<logo :x=0 :y=0 :size=50 />
-
-			<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
-			<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
-
-			<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.B.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.B.normal" stroke-width="4" />
-
-			<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
-
-			<circle cx="0" cy="0" r="4" fill="white"/>
-		</svg>
-		<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
-			<logo :x=0 :y=0 :size=50 />
-
-			<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.Y.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
-			<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.C.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.B.normal" stroke-width="4" />
-			<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.M.normal" stroke-width="4" />
-
-			<circle cx="0" cy="0" r="4" fill="white"/>
-		</svg>
-		{% endcomment %}
-	</p>
+	</div>
 
 
 	<h3 id="winning" class="orbitron">Winning</h3>
@@ -251,6 +161,102 @@
 		In this contrived example, Red has connected one of the three red-side spaces with one of the opposite cyan-side spaces.
 		Red wins!
 	</p>
-	<img src="{% static 'img/win-example.svg' %}"/>
+	<p class="has-text-centered">
+		<img src="{% static 'img/win-example.svg' %}"/>
+	</p>
+
+
+	{% comment %}
+	<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+		<logo :x=0 :y=0 :size=50 />
+
+		<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
+		<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
+
+		<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.C.normal" stroke-width="4" />
+		<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.C.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.C.normal" stroke-width="4" />
+
+		<circle cx="0" cy="0" r="4" fill="white"/>
+	</svg>
+	<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+		<logo :x=0 :y=0 :size=50 />
+
+		<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
+
+		<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.C.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.C.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.C.normal" stroke-width="4" />
+
+		<circle cx="0" cy="0" r="4" fill="white"/>
+	</svg>
+	<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+		<logo :x=0 :y=0 :size=50 />
+
+		<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.R.normal" stroke-width="4" />
+		<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
+
+		<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
+
+		<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.B.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.B.normal" stroke-width="4" />
+
+		<circle cx="0" cy="0" r="4" fill="white"/>
+	</svg>
+	<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+		<logo :x=0 :y=0 :size=50 />
+
+		<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
+		<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
+
+		<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.B.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.B.normal" stroke-width="4" />
+
+		<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
+
+		<circle cx="0" cy="0" r="4" fill="white"/>
+	</svg>
+	<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+		<logo :x=0 :y=0 :size=50 />
+
+		<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(Math.PI/2)" :stroke="colors.R.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(Math.PI/6)" :y2="25 * -Math.sin(Math.PI/6)" :stroke="colors.Y.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(11*Math.PI/6)" :y2="25 * -Math.sin(11*Math.PI/6)" :stroke="colors.G.normal" stroke-width="4" />
+		<line :x1="0" y1="0" x2="0" :y2="25 * -Math.sin(3*Math.PI/2)" :stroke="colors.C.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(7*Math.PI/6)" :y2="25 * -Math.sin(7*Math.PI/6)" :stroke="colors.B.normal" stroke-width="4" />
+		<line :x1="0" y1="0" :x2="25 * Math.cos(5*Math.PI/6)" :y2="25 * -Math.sin(5*Math.PI/6)" :stroke="colors.M.normal" stroke-width="4" />
+
+		<circle cx="0" cy="0" r="4" fill="white"/>
+	</svg>
+
+	<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+		<logo :x=0 :y=0 :size="50" variant="MRY" :showTeamsAndTurn="true"/>
+
+		<text :x="15 * Math.cos(Math.PI/2)" :y="15 * -Math.sin(Math.PI/2)" font-family="monospace" dominant-baseline="central" text-anchor="middle" pointer-events="none">MRY</text>
+		<text :x="15 * Math.cos(3*Math.PI/2)" :y="15 * -Math.sin(3*Math.PI/2)" font-family="monospace" style="dominant-baseline:central; text-anchor:middle;" pointer-events="none">GCB</text>
+	</svg>
+	<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+		<logo :x=0 :y=0 :size="50" variant="MR" :showTeamsAndTurn="true"/>
+
+		<text :x="18 * Math.cos(2*Math.PI/3)" :y="18 * -Math.sin(2*Math.PI/3)" font-family="monospace" dominant-baseline="central" text-anchor="middle" pointer-events="none">MR</text>
+		<text :x="18 * Math.cos(0)" :y="18 * -Math.sin(0)" font-family="monospace" dominant-baseline="central" text-anchor="middle" pointer-events="none">YG</text>
+		<text :x="18 * Math.cos(-2*Math.PI/3)" :y="18 * -Math.sin(-2*Math.PI/3)" font-family="monospace" dominant-baseline="central" text-anchor="middle" pointer-events="none">CB</text>
+	</svg>
+	<svg width="100" height="100" viewbox="-50 -50 100 100" xmlns="http://www.w3.org/2000/svg">
+		<logo :x=0 :y=0 :size="50" variant="R" :showTeamsAndTurn="true"/>
+
+		<text :x="20 * Math.cos(Math.PI/2)" :y="20 * -Math.sin(Math.PI/2)" font-family="monospace" dominant-baseline="central" text-anchor="middle" pointer-events="none">R</text>
+		<text :x="20 * Math.cos(Math.PI/6)" :y="20 * -Math.sin(Math.PI/6)" font-family="monospace" dominant-baseline="central" text-anchor="middle" pointer-events="none">Y</text>
+		<text :x="20 * Math.cos(11*Math.PI/6)" :y="20 * -Math.sin(11*Math.PI/6)" font-family="monospace" dominant-baseline="central" text-anchor="middle" pointer-events="none">G</text>
+		<text :x="20 * Math.cos(3*Math.PI/2)" :y="20 * -Math.sin(3*Math.PI/2)" font-family="monospace" dominant-baseline="central" text-anchor="middle" pointer-events="none">C</text>
+		<text :x="20 * Math.cos(7*Math.PI/6)" :y="20 * -Math.sin(7*Math.PI/6)" font-family="monospace" dominant-baseline="central" text-anchor="middle" pointer-events="none">B</text>
+		<text :x="20 * Math.cos(5*Math.PI/6)" :y="20 * -Math.sin(5*Math.PI/6)" font-family="monospace" dominant-baseline="central" text-anchor="middle" pointer-events="none">M</text>
+	</svg>
+	{% endcomment %}
 </div>
 {% endblock content %}
