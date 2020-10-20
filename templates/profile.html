@@ -19,111 +19,125 @@
 </style>
 
 <div class="content">
-	{% if False %}
-	<div class="columns">
-		<div class="column is-narrow">
-			<form action="/friends/remove/" method="post">
-				{% csrf_token %}
+	{% if show_friends %}
+		<div class="columns">
+			<div class="column is-narrow">
+				<h3 style="margin-bottom:0.5rem">Friends</h3>
 
+				{% if friends %}
+					<table class="table is-narrow">
+						{% for friend in friends %}
+							<tr>
+								<td><a href="/profile/{{ friend.username }}/">{{ friend.username }}</a></td>
+								<td class="has-text-right" style="padding-left:3rem">
+									{% if False %}
+									<form action="/friends/challenge/" method="post" style="display:inline; padding:0;">
+										{% csrf_token %}
+										<button type="submit" class="fa-btn" name="upk" value="{{ friend.pk }}">
+											<span class="icon">
+												{% comment %}<i class="fas fa-chess-knight" title="Challenge to a game"></i>{% endcomment %}
+												{% comment %}<i class="fas fa-chess-queen" title="Challenge to a game"></i>{% endcomment %}
+												{% comment %}<i class="fas fa-crown" title="Challenge to a game"></i>{% endcomment %}
+												<i class="fas fa-paper-plane" title="Challenge to a game"></i>
+											</span>
+										</button>
+									</form>
+									{% endif %}
+									<form action="/friends/remove/" method="post" style="display:inline; padding:0;" onsubmit="return confirm('Are you sure you want to remove {{ friend.username }}?')">
+										{% csrf_token %}
+										<button type="submit" class="fa-btn" name="upk" value="{{ friend.pk }}">
+											<span class="icon">
+												<i class="fas fa-minus-circle" title="Remove friend"></i>
+											</span>
+										</button>
+									</form>
+								</td>
+							</tr>
+						{% endfor %}
+					</table>
+				{% endif %}
+
+				<h5>Send a friend request</h5>
+				<form action="/friends/request/" method="post" style="display:inline; padding:0;">
+					{% csrf_token %}
+
+					<div class="columns is-mobile" style="padding:0.25rem">
+						<div class="column">
+							<input type="text" class="input is-small" name="name">
+						</div>
+
+						<div class="column is-narrow">
+							<button type="submit" class="fa-btn">
+								<span class="icon is-medium">
+									<i class="fas fa-plus-circle" title="Send friend request"></i>
+								</span>
+							</button>
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<div class="column is-narrow">
 				<table class="table is-narrow">
-					<tr>
-						<th colspan="2" class="has-text-left">
-							Friends
-						</th>
-					</tr>
-					{% for friend in friends %}
+					{% if pending_you %}
 						<tr>
-							<td>{{ friend.username }}</td>
-							<td class="has-text-right" style="padding-left:3rem">
-								<button type="submit" class="fa-btn" name="upk" value="{{ friend.pk }}">
-									<span class="icon">
-										<i class="fas fa-minus-circle" title="Remove friend"></i>
-									</span>
-								</button>
-							</td>
+							<th colspan="2" class="has-text-left">
+								Friend Requests
+							</th>
 						</tr>
-					{% endfor %}
+						{% for fr in pending_you %}
+							<tr>
+								<td><a href="/profile/{{ fr.requester.username }}/">{{ fr.requester.username }}</a></td>
+								<td class="has-text-right" style="padding-left:3rem">
+									<form action="/friends/accept/" method="post" style="display:inline; padding:0;">
+										{% csrf_token %}
+										<button type="submit" class="fa-btn" name="frpk" value="{{ fr.pk }}">
+											<span class="icon">
+												<i class="fas fa-check-circle" title="Accept friend request"></i>
+											</span>
+										</button>
+									</form>
+									<form action="/friends/decline/" method="post" style="display:inline; padding:0;">
+										{% csrf_token %}
+										<button type="submit" class="fa-btn" name="frpk" value="{{ fr.pk }}">
+											<span class="icon">
+												<i class="fas fa-times-circle" title="Reject friend request"></i>
+											</span>
+										</button>
+									</form>
+								</td>
+							</tr>
+						{% endfor %}
+					{% endif %}
+
+					{% if pending_them %}
+						<tr>
+							<th colspan="2" class="has-text-left">
+								Pending Requests
+							</th>
+						</tr>
+						{% for fr in pending_them %}
+							<tr>
+								<td><a href="/profile/{{ fr.responder.username }}/">{{ fr.responder.username }}</a></td>
+								<td class="has-text-right" style="padding-left:3rem">
+									<form action="/friends/cancel/" method="post">
+										{% csrf_token %}
+										<button type="submit" class="fa-btn" name="frpk" value="{{ fr.pk }}">
+											<span class="icon">
+												<i class="fas fa-minus-circle" title="Cancel friend request"></i>
+											</span>
+										</button>
+									</form>
+								</td>
+							</tr>
+						{% endfor %}
+					{% endif %}
 				</table>
-			</form>
-
-			<br>
-			<h6>Send a friend request</h6>
-			<form action="/friends/request/" method="post" style="display:inline; padding:0;">
-				{% csrf_token %}
-
-				<div style="width:100%">
-					<input type="text" class="input is-small" name="name" style="width:auto">
-
-					<button type="submit" class="fa-btn">
-						<span class="icon is-medium">
-							<i class="fas fa-plus-circle" title="Send friend request"></i>
-						</span>
-					</button>
-				</div>
-			</form>
+			</div>
 		</div>
-
-		<div class="column is-narrow">
-			<table class="table is-narrow">
-				{% if pending_you %}
-					<tr>
-						<th colspan="2" class="has-text-left">
-							Friend Requests
-						</th>
-					</tr>
-					{% for fr in pending_you %}
-						<tr>
-							<td>{{ fr.requester.username }}</td>
-							<td class="has-text-right" style="padding-left:3rem">
-								<form action="/friends/accept/" method="post" style="display:inline; padding:0;">
-									{% csrf_token %}
-									<button type="submit" class="fa-btn" name="frpk" value="{{ fr.pk }}">
-										<span class="icon">
-											<i class="fas fa-check-circle" title="Accept friend request"></i>
-										</span>
-									</button>
-								</form>
-								<form action="/friends/decline/" method="post" style="display:inline; padding:0;">
-									{% csrf_token %}
-									<button type="submit" class="fa-btn" name="frpk" value="{{ fr.pk }}">
-										<span class="icon">
-											<i class="fas fa-times-circle" title="Reject friend request"></i>
-										</span>
-									</button>
-								</form>
-							</td>
-						</tr>
-					{% endfor %}
-				{% endif %}
-
-				{% if pending_them %}
-					<tr>
-						<th colspan="2" class="has-text-left">
-							Pending Requests
-						</th>
-					</tr>
-					{% for fr in pending_them %}
-						<tr>
-							<td>{{ fr.responder.username }}</td>
-							<td class="has-text-right" style="padding-left:3rem">
-								<form action="/friends/cancel/" method="post">
-									{% csrf_token %}
-									<button type="submit" class="fa-btn" name="frpk" value="{{ fr.pk }}">
-										<span class="icon">
-											<i class="fas fa-minus-circle" title="Cancel friend request"></i>
-										</span>
-									</button>
-								</form>
-							</td>
-						</tr>
-					{% endfor %}
-				{% endif %}
-			</table>
-		</div>
-	</div>
 	{% endif %}
 
-	<h4>Games</h4>
+	<h3>Games</h3>
 	<div class="table-container">
 		<table class="table has-text-left">
 			<thead>
@@ -144,13 +158,13 @@
 					<tr>
 						{% if user.is_staff %}
 							<td>{{ game.id }}</td>
-							<td>{{ game.author.username }}</td>
+							<td><a href="/profile/{{ game.author.username }}/">{{ game.author.username }}</a></td>
 						{% endif %}
-						<td class="monospace"><a href="/game/{{ game.uid }}">{{ game.uid }}</a></td>
+						<td><a class="monospace" href="/game/{{ game.uid }}">{{ game.uid }}</a></td>
 						<td>{{ game.get_variant_display }}</td>
 						<td><pre class="help" style="line-height:1rem; margin:0;">{{ game.hpgn_player_tags }}</pre></td>
 						<td>{{ game.result | default:'' }}</td>
-						<td class="monospace"><div class="help" style="margin:0">{{ game.hfen }}</div></td>
+						<td><div class="help monospace" style="margin:0">{{ game.hfen }}</div></td>
 					</tr>
 				{% endfor %}
 			</tbody>

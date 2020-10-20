@@ -97,8 +97,8 @@
 		<p class="help">
 			Note that when two pieces share a space, their overlap is a different color.
 			This is merely a visual hint for what color <em>can</em> play on that space.
-			It does not mean that the overlap color is already in that space,
-			and that space does not count toward the overlap color's paths to victory.
+			It does not mean that the overlap color is already in that space;
+			that space does not count toward the overlap color's paths to victory.
 		</p>
 
 		{% comment %}
@@ -143,13 +143,12 @@
 	<p>
 		<div style="display:inline-block; text-align:center; padding:0 1rem;">
 			MRY GCB
-			{% comment %}(Adjacent){% endcomment %}
 			<br><img src="{% static 'img/variant-mry.svg' %}" />
 		</div>
 		<div style="display:inline-block; text-align:center; padding:0 1rem;">
 			RGB CMY
-			{% comment %}(Alternating){% endcomment %}
-			<br><img src="{% static 'img/variant-rgb.svg' %}" />
+			<div class="help">[deprecated]</div>
+			<img src="{% static 'img/variant-rgb.svg' %}" />
 		</div>
 	</p>
 
@@ -157,13 +156,12 @@
 	<p>
 		<div style="display:inline-block; text-align:center; padding:0 1rem;">
 			MR YG CB
-			{% comment %}(Adjacent){% endcomment %}
 			<br><img src="{% static 'img/variant-mr.svg' %}" />
 		</div>
 		<div style="display:inline-block; text-align:center; padding:0 1rem;">
 			RC BY GM
-			{% comment %}(Across){% endcomment %}
-			<br><img src="{% static 'img/variant-rc.svg' %}" />
+			<div class="help">[deprecated]</div>
+			<img src="{% static 'img/variant-rc.svg' %}" />
 		</div>
 	</p>
 
