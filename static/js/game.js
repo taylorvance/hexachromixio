@@ -433,7 +433,7 @@ var app = new Vue({
 		if(IS_LIVE !== false) {
 			var game_uid = JSON.parse(document.getElementById('GAMEUID').textContent)
 
-			this.socket = new ReconnectingWebSocket('ws://' + window.location.hostname + ':8880/ws/play/' + game_uid + '/')
+			this.socket = new ReconnectingWebSocket('ws://' + window.location.hostname + ':' + window.location.port + '/ws/play/' + game_uid + '/')
 			this.socket.onopen = this.socket_opened
 			this.socket.onclose = this.socket_closed
 			this.socket.onmessage = this.socket_message
@@ -523,8 +523,8 @@ var app = new Vue({
 				'color': color,
 			}))
 		},
-		releaseAllColors: function() {
-			this.socket.send(JSON.stringify({'action': 'release_all_colors'}))
+		resetColors: function() {
+			this.socket.send(JSON.stringify({'action': 'reset_colors'}))
 		},
 
 		makeMove: function(q, r) {
