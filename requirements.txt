@@ -1,4 +1,5 @@
 hexachromix==0.2.5
+cython
 channels
 asgiref
 gunicorn
