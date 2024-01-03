@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: ./docker/gunicorn/Dockerfile
+    ports:
+      - "8006:8000"
+    environment:
+      - "DJANGO_SECRET_KEY=rope-those-lushly"
+      - "DJANGO_DEBUG=True"
+      - "DJANGO_ALLOWED_HOSTS=localhost"
+      - "DJANGO_DB_ENGINE=django.db.backends.sqlite3"
+      - "DJANGO_DB_NAME=/data/db.sqlite3"
+      - "DJANGO_LOG_LEVEL=DEBUG"
+    volumes:
+      - hexachromix_data:/data
+      - staticfiles:/app/staticfiles
+      - ./:/app
+    command: "python manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  hexachromix_data:
+  staticfiles:

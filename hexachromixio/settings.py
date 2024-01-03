@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '2s^(7p_(p)hn8f+k8(n+s&!2^y+zwby*)=b_v($948fb6%l2uz')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') != 'False'
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '.hexachromix.io localhost').split()
 
@@ -32,9 +32,10 @@ ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '.hexachromix.io localhos
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
     'hexachromix',
     'friends',
-    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CSRF_TRUSTED_ORIGINS = ['https://*.hexachromix.io','http://localhost','http://localhost:8600']
+CSRF_TRUSTED_ORIGINS = ['https://*.hexachromix.io','http://localhost']
 
 ROOT_URLCONF = 'hexachromixio.urls'
 
@@ -75,7 +76,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'hexachromixio.wsgi.application'
 
-ASGI_APPLICATION = 'hexachromixio.routing.application'
+ASGI_APPLICATION = 'hexachromixio.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
@@ -100,6 +101,23 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'WARNING'),
+            'propagate': False,
+        },
+    },
 }
 
 
