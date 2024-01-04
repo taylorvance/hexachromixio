@@ -1,36 +1,44 @@
-version: '3'
+version: '3.8'
 
 services:
-  nginx:
-    image: "nginx:latest"
+  web:
+    image: taylorvance/hexachromix:web-latest
     ports:
       - "8600:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - staticfiles:/app/staticfiles
+      - static:/app/staticfiles
     depends_on:
       - gunicorn
-      - daphne
 
   gunicorn:
-    image: "taylorvance/hexachromix:gunicorn-latest"
+    image: taylorvance/hexachromix:gunicorn-latest
     environment:
+      - "DJANGO_SECRET_KEY=rope-those-lushly"
+      - "DJANGO_DEBUG=True"
       - "DJANGO_ALLOWED_HOSTS=localhost"
       - "DJANGO_DB_ENGINE=django.db.backends.sqlite3"
       - "DJANGO_DB_NAME=/data/db.sqlite3"
+      - "DJANGO_LOG_LEVEL=DEBUG"
+      - "DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8600"
     volumes:
-      - hexachromix_data:/data
-      - staticfiles:/app/staticfiles
+      - db:/data
+      - static:/app/staticfiles
+      - ./:/app
 
   daphne:
-    image: "taylorvance/hexachromix:daphne-latest"
+    image: taylorvance/hexachromix:daphne-latest
     environment:
+      - "DJANGO_SECRET_KEY=rope-those-lushly"
+      - "DJANGO_DEBUG=True"
       - "DJANGO_ALLOWED_HOSTS=localhost"
       - "DJANGO_DB_ENGINE=django.db.backends.sqlite3"
       - "DJANGO_DB_NAME=/data/db.sqlite3"
+      - "DJANGO_LOG_LEVEL=DEBUG"
+      - "DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8600"
     volumes:
-      - hexachromix_data:/data
+      - db:/data
+      - ./:/app
 
 volumes:
-  hexachromix_data:
-  staticfiles:
+  db:
+  static:
