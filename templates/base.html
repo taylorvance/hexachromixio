@@ -58,7 +58,7 @@
 					<div class="navbar-item">
 						<div class="buttons">
 							{% if user.is_authenticated %}
-								<form method="post" action="/account/logout">
+								<form method="post" action="/account/logout/">
 									{% csrf_token %}
 									<button type="submit" class="button is-outlined">Log out</button>
 								</form>
@@ -80,7 +80,7 @@
 			<div class="container">
 				<div class="columns is-centered">
 					<div class="column is-narrow" style="max-width:100vw; padding:0 5vw;">
-						{% block content %}<p>placeholder content...</p>{% endblock content %}
+						{% block content %}<p>page content here...</p>{% endblock content %}
 					</div>
 				</div>
 			</div>
