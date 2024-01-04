@@ -19,10 +19,9 @@ from channels.security.websocket import AllowedHostsOriginValidator
 
 from hexachromix.routing import websocket_urlpatterns
 
-
-import logging
-logger = logging.getLogger(__name__)
-logger.warn('...in asgi.py...')
+# import logging
+# logger = logging.getLogger(__name__)
+# logger.warn('...in asgi.py...')
 
 application = ProtocolTypeRouter({
     'http': django_asgi_app,
