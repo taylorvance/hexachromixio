@@ -1,0 +1,34 @@
+name: Rebuild All Docker Images
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Nginx Docker Image
+        run: docker build --no-cache -t taylorvance/hexachromix:web-latest ./docker/nginx/
+      - name: Build Gunicorn Docker Image
+        run: docker build --no-cache -t taylorvance/hexachromix:gunicorn-latest ./docker/gunicorn
+      - name: Build Daphne Docker Image
+        run: docker build --no-cache -t taylorvance/hexachromix:daphne-latest ./docker/daphne
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Push Nginx Image to Docker Hub
+        run: docker push taylorvance/hexachromix:web-latest
+      - name: Push Gunicorn Image to Docker Hub
+        run: docker push taylorvance/hexachromix:gunicorn-latest
+      - name: Push Daphne Image to Docker Hub
+        run: docker push taylorvance/hexachromix:daphne-latest
