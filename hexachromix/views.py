@@ -1,22 +1,26 @@
 from django.shortcuts import render, redirect
+from django.db.models import Q
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 
 from hexachromix.models import Game
 from hexachromix.utils import HexachromixState
 
+import re
+
 
 def find_game(request):
-    game_uid = request.GET['game_uid']
-    game_uid = game_uid.strip()
-    game_uid = game_uid.lower()
+    game_identifier = request.GET['game_identifier']
+    if not game_identifier:
+        return HttpResponse("No game identifier provided.")
+    game_identifier = re.sub(r'\s+', '-', game_identifier.strip().lower())
 
     try:
-        game = Game.objects.get(uid=game_uid)
+        game = Game.objects.get(Q(uid=game_identifier) | Q(code=game_identifier))
     except Game.DoesNotExist:
-        return HttpResponse("game %s not found :(" % game_uid)
+        return HttpResponse("game %s not found :(" % game_identifier)
 
-    return redirect('/game/%s' % game.uid)
+    return redirect('/game/%s' % game.code)
 
 @login_required
 def create_game(request):
@@ -26,11 +30,11 @@ def create_game(request):
 
     return redirect('/game/%s' % game.uid)
 
-def view_game(request, game_uid):
+def view_game(request, game_identifier):
     try:
-        game = Game.objects.get(uid=game_uid)
+        game = Game.objects.get(Q(uid=game_identifier) | Q(code=game_identifier))
     except Game.DoesNotExist:
-        return HttpResponse("game %s not found" % game_uid)
+        return HttpResponse("game %s not found" % game_identifier)
 
     if game.is_active:
         # Make sure a session exists so the channel can generate a player identifier.

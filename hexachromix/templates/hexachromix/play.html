@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Hexachromix - {{ game.uid }}{% endblock %}
+{% block title %}{{ game.code }}{% endblock %}
 
 {% block content %}
 {% load static %}
@@ -20,6 +20,7 @@
 			</div>
 
 			<div class="column">
+				{% comment %}
 				<div class="card">
 					<header class="card-header">
 						<p class="card-header-title">
@@ -32,6 +33,7 @@
 						</div>
 					</div>
 				</div>
+				{% endcomment %}
 
 				<div v-if="!termination_message" class="card">
 					<header class="card-header">
@@ -66,7 +68,7 @@
 							{% for c in 'RYGCBM' %}
 								{{ c }}: [[ colorPlayers['{{ c }}'] ]]<br>
 							{% endfor %}
-							<br>
+							<br>[[ colorPlayers ]]<br>
 							<pre>{{ game.formatted_hpgn }}</pre>
 						</div>
 					</div>

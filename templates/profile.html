@@ -143,10 +143,10 @@
 			<thead>
 				<tr>
 					{% if user.is_staff %}
-						<th>pk</th>
+						<th>id/uid</th>
 						<th>Author</th>
 					{% endif %}
-					<th>Game ID</th>
+					<th>Game Code</th>
 					<th>Variant</th>
 					<th>Players</th>
 					<th>Result</th>
@@ -157,10 +157,10 @@
 				{% for game in games %}
 					<tr>
 						{% if user.is_staff %}
-							<td>{{ game.id }}</td>
+							<td class="monospace">{{ game.id }} {{ game.uid }}</td>
 							<td><a href="/profile/{{ game.author.username }}/">{{ game.author.username }}</a></td>
 						{% endif %}
-						<td><a class="monospace" href="/game/{{ game.uid }}">{{ game.uid }}</a></td>
+						<td><a class="monospace" href="/game/{{ game.code }}">{{ game.code }}</a></td>
 						<td>{{ game.get_variant_display }}</td>
 						<td><pre class="help" style="line-height:1rem; margin:0;">{{ game.hpgn_player_tags }}</pre></td>
 						<td>{{ game.result | default:'' }}</td>

@@ -5,6 +5,7 @@ from django.utils.functional import cached_property
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 
+import os
 from time import time
 import random, re
 
@@ -34,16 +35,25 @@ class Game(models.Model):
         uid = ''.join(reversed(chars or '0'))
 
         # Append some extra random chars to bring the total length to 12 characters.
-        # FYI: Until Christmas Eve 2038 (ZZZZZZ), that means 6 extra chars.
+        # FYI: Until Christmas Eve 2038 (ZZZZZZ), that means 6 extra chars. For a long time after that, it's 5.
         uid += ''.join(random.choices(alphabet, k=(12-len(uid))))
 
         return uid
 
+    def gen_code():
+        with open(os.path.join(os.path.dirname(__file__), 'wordlist.txt'), 'r') as file:
+            words = [word.strip() for word in file.readlines()]
+
+        while True:
+            code = '-'.join(random.sample(words, 3))
+            if not Game.objects.filter(code=code).exists():
+                return code
 
     # Model fields
     datetime_created = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.RESTRICT)
     uid = models.CharField(unique=True, editable=False, default=gen_uid, max_length=12)
+    code = models.CharField(unique=True, editable=False, default=gen_code, max_length=26) # The longest word is 8 chars. Worst case, all 3 words are 8 chars: 8*3 + 2[spaces] = 26
     variant = models.CharField(choices=Variant.choices, max_length=3)
 
 

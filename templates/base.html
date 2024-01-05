@@ -60,7 +60,7 @@
 							{% if user.is_authenticated %}
 								<form method="post" action="/account/logout/">
 									{% csrf_token %}
-									<button type="submit" class="button is-outlined">Log out</button>
+									<button type="submit" class="button is-outlined orbitron">Log out</button>
 								</form>
 							{% else %}
 								<a href="/signup" class="button is-outlined is-primary"><strong>Sign up</strong></a>
@@ -73,7 +73,7 @@
 		</nav>
 
 		<div style="background-color:#e00; color:white; font-size:0.75rem; padding-left:0.5rem;">
-			ALPHA: expect bugs, changes, data loss, downtime
+			BETA: expect bugs, changes, data loss, downtime
 		</div>
 
 		<section class="section">
