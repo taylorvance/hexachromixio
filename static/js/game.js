@@ -23,10 +23,10 @@ const store = new Vuex.Store({
 })
 
 
-var colorMixin = {
+const colorMixin = {
 	data: function() {
-		var colors = {}
-		var hue = 0
+		const colors = {}
+		let hue = 0
 		for(c of "RYGCBM") {
 			colors[c] = {
 				normal: 'hsl('+hue+', 100%, 45%)',
@@ -307,6 +307,7 @@ Vue.component('color-picker', {
 	},
 	methods: {
 		isMine: function(color) { return store.state.colorPlayers[color] == this.$parent.pid },
+		isAI: function(color) { return store.state.colorPlayers[color] && store.state.colorPlayers[color].startsWith('ai:') },
 		isClaimed: function(color) { return store.state.colorPlayers[color] },//.fix
 		canClick: function(color, team) {
 			if(this.isMine(color)) return true
@@ -325,9 +326,10 @@ Vue.component('color-picker', {
 			//.request color claim, which will broadcast all colors, then commit the state change there
 		},
 		icon: function(color) {
-			if(this.isMine(color)) return 'fa-user-circle'
-			else if(this.isClaimed(color)) return 'fa-check-circle'
-			else return 'fa-circle'
+			if(this.isMine(color)) return 'fa-solid fa-user-circle'
+			else if(this.isAI(color)) return 'fa-solid fa-robot'
+			else if(this.isClaimed(color)) return 'fa-regular fa-user-circle'
+			else return 'fa-regular fa-circle'
 		},
 	},
 	template: `<div>
@@ -339,18 +341,15 @@ Vue.component('color-picker', {
 				v-on:click="canClick(color,team) && toggleColor(color)"
 				style="margin-right:0.5rem;"
 				:style="'color:' + (myTeam&&team!=myTeam ? colors[color].light : colors[color].normal) + '; cursor:' + (canClick(color,team) ? 'pointer' : 'not-allowed')"
-			>
-				<i class="far fa-3x" :class="icon(color)"></i>
-			</span>
-
+			><i class="fa-3x" :class="icon(color)"></i></span>
 			<hr style="margin: 0.5em 0">
 		</div>
 
-
 		<div style="text-align:left">
-			<div><span class="icon"><i class="far fa-user-circle"></i></span>: Mine</div>
-			<div><span class="icon"><i class="far fa-check-circle"></i></span>: Claimed</div>
-			<div><span class="icon"><i class="far fa-circle"></i></span>: Unclaimed</div>
+			<div><span class="icon"><i class="fa-solid fa-user-circle"></i></span>: Me</div>
+			<div><span class="icon"><i class="fa-regular fa-user-circle"></i></span>: Person</div>
+			<div><span class="icon"><i class="fa-solid fa-robot"></i></span>: AI</div>
+			<div><span class="icon"><i class="fa-regular fa-circle"></i></span>: Unclaimed</div>
 		</div>
 	</div>`
 })
@@ -527,6 +526,9 @@ var app = new Vue({
 		},
 		resetColors: function() {
 			this.socket.send(JSON.stringify({'action': 'reset_colors'}))
+		},
+		aiClaimColors: function() {
+			this.socket.send(JSON.stringify({'action': 'ai_claim_colors'}))
 		},
 
 		makeMove: function(q, r) {

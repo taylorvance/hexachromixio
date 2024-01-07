@@ -52,9 +52,9 @@ class Game(models.Model):
     # Model fields
     datetime_created = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.RESTRICT)
-    uid = models.CharField(unique=True, editable=False, default=gen_uid, max_length=12)
-    code = models.CharField(unique=True, editable=False, default=gen_code, max_length=26) # The longest word is 8 chars. Worst case, all 3 words are 8 chars: 8*3 + 2[spaces] = 26
-    variant = models.CharField(choices=Variant.choices, max_length=3)
+    uid = models.CharField(max_length=12, unique=True, default=gen_uid, editable=False)
+    code = models.CharField(max_length=26, unique=True, default=gen_code, editable=False) # The longest word is 8 chars. Worst case, all 3 words are 8 chars: 8*3 + 2[spaces] = 26
+    variant = models.CharField(choices=Variant.choices, max_length=3, editable=False)
 
 
     @property

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load static %}
+
+<div class="content">
+	<form action="/game/create/" method="post">
+		{% csrf_token %}
+
+		{% for variant in variants %}
+			<div class="card is-inline-block">
+				<div class="card-image">
+					<figure class="image is-128x128">
+						<img src="{% static 'img/variant-'|add:variant.value|lower|add:'.svg' %}" alt="{{ variant.label }}">
+					</figure>
+				</div>
+
+				<header class="card-header">
+					<p class="card-header-title orbitron">
+						{{ variant.label }}
+					</p>
+				</header>
+
+				<div class="card-content">
+					{{ variant.teams }} teams
+					<br>
+					{{ variant.players }} players
+				</div>
+
+				<div class="card-footer" style="text-align:center">
+					<div class="card-footer-item">
+						<button type="submit" class="button is-primary" name="variant" value="{{ variant.value }}">Create</button>
+					</div>
+				</div>
+			</div>
+		{% endfor %}
+	</form>
+</div>
+{% endblock content %}

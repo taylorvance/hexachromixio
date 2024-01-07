@@ -3,7 +3,7 @@ from asgiref.sync import sync_to_async
 from django.core.cache import cache
 from channels.db import database_sync_to_async
 import json
-import hashlib, uuid
+import hashlib
 import logging
 
 from hexachromix.models import Game, Move, GamePlayer
@@ -33,16 +33,17 @@ class PlayConsumer(AsyncWebsocketConsumer):
         if self.scope['user'].is_authenticated:
             # This allows a user to maintain colors across devices
             # If this changes, update get_color_players()
-            self.player_identifier = self.scope['user'].username
+            self.player_identifier = f'user:{self.scope["user"].username}'
         elif self.scope['session'].session_key:
             # Hash based on ses key, game uid, and salt
             #.move the salt to untracked cfg
             hashid = f'{self.scope["session"].session_key} - {self.game_uid} - makes my steaks taste great'
             hashid = hashlib.md5(hashid.encode('utf-8')).hexdigest()
-            self.player_identifier = str(hashid)[:12]
+            hashid = str(hashid)[:12]
+            self.player_identifier = f'anon:{hashid}'
         else:
             # If they somehow don't have a session, treat them all the same
-            self.player_identifier = 'whoareyou'
+            self.player_identifier = 'anon:whoareyou'
 
         logger.info(f'PlayConsumer: {self.player_identifier} connected to {self.game_uid}')
 
@@ -71,6 +72,30 @@ class PlayConsumer(AsyncWebsocketConsumer):
 
         if text_data_json['action'] == 'claim_color':
             await self.claim_color(text_data_json['color'])
+        elif text_data_json['action'] == 'ai_claim_colors':
+            # Is this the game author?
+            game = await fetch_game(self.game_uid)
+            if self.scope['user'] != await fetch_game_author(game):
+                await self.send(text_data=json.dumps({
+                    'error': 'NO_PERMISSION',
+                }))
+                return
+
+            cache_val = await self.get_color_players()
+            remaining_colors = [c for c in 'RYGCBM' if not cache_val.get(c)]
+
+            for color in remaining_colors:
+                cache_val[color] = 'ai:v1'
+
+            await async_cache_set(f'game_{self.game_uid}_colors', cache_val, 3600)
+
+            await self.channel_layer.group_send(
+                self.group_name,
+                {
+                    'type': 'broadcast_color_players',
+                    'color_players': cache_val,
+                }
+            )
         elif text_data_json['action'] == 'release_color':
             color = Move.Color[text_data_json['color']]
 
@@ -181,6 +206,8 @@ class PlayConsumer(AsyncWebsocketConsumer):
                 }
             )
 
+            # Is the new current player an AI?
+
 
     async def claim_color(self, color:str):
         color = Move.Color[color]
@@ -203,7 +230,7 @@ class PlayConsumer(AsyncWebsocketConsumer):
             self.send(text_data=json.dumps({'error': 'OPPOSING_TEAM'}))
             return
 
-        # Set that color-player in the db and the cache
+        # Set that color-player in the db and the cache.
         if self.scope['user'].is_authenticated:
             game = await fetch_game(self.game_uid)
             await database_sync_to_async(GamePlayer.objects.create)(
@@ -254,7 +281,7 @@ class PlayConsumer(AsyncWebsocketConsumer):
 
         gps = await fetch_game_players(self.game_uid)
         for gp in gps:
-            cache_val[gp['color']] = gp['player__username']
+            cache_val[gp['color']] = f'user:{gp["player__username"]}'
 
         await async_cache_set(cache_key, cache_val, 3600)
 

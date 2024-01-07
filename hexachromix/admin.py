@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import Game, Move
 
 class GameAdmin(admin.ModelAdmin):
-    readonly_fields=['datetime_created', 'uid']
+    readonly_fields=['datetime_created', 'uid', 'code']
 
 class MoveAdmin(admin.ModelAdmin):
     readonly_fields=['datetime_created']

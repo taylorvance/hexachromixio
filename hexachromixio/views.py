@@ -11,18 +11,7 @@ from friends.models import FriendRequest
 
 
 def home(request):
-    variants = []
-    for variant in Game.Variant:
-        num = len(variant.label.split())
-        variants.append({
-            'label': variant.label,
-            'value': variant.value,
-            'teams': num,
-            'players': '%d%s' % (num, '+' if num < 6 else ''),
-        })
-
     return render(request, 'home.html', {
-        'variants': variants,
         'my_turn': None if not request.user.is_authenticated else request.user.hexachromix_games_my_turn(),
     })
 

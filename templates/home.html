@@ -5,15 +5,34 @@
 <div class="content">
 	{% load static %}
 
+	<p>
+		{% if user.is_authenticated %}
+			<a class="button is-primary orbitron" href="/game/new">Create Game</a>
+		{% else %}
+			<a href="{% url 'signup' %}">Sign up</a> or <a href="{% url 'login' %}">log in</a> to create a game.
+			<br>Or join an existing game:
+		{% endif %}
+	</p>
+
+	<form action="/game/search/" method="get">
+		<div class="field has-addons">
+			<div class="control">
+				<input type="text" class="input orbitron" name="game_identifier" placeholder="Game Code">
+			</div>
+			<div class="control">
+				<button type="submit" class="button is-primary orbitron">Join</button>
+			</div>
+		</div>
+	</form>
+
 	{% if my_turn %}
 		<h3 class="orbitron">Your Turn</h3>
-
 		<div id="app">
 			{% for game in my_turn %}
 				<div class="card is-inline-block" style="vertical-align:top">
 					<header class="card-header">
 						<p class="card-header-title" style="padding: 0.5rem 1rem">
-							<a href="/game/{{ game.uid }}">{{ game.uid }}</a>
+							<a href="/game/{{ game.code }}">{{ game.code }}</a>
 						</p>
 					</header>
 
@@ -29,55 +48,6 @@
 				</div>
 			{% endfor %}
 		</div>
-	{% endif %}
-
-	<h3 class="orbitron">Join a Game</h3>
-	<form action="/game/search" method="get">
-		<div class="field has-addons">
-			<div class="control">
-				<input type="text" class="input" name="game_identifier" placeholder="Game ID">
-			</div>
-			<div class="control">
-				<button type="submit" class="button is-primary">Join</button>
-			</div>
-		</div>
-	</form>
-
-	<h3 class="orbitron">Create a Game</h3>
-	{% if user.is_authenticated %}
-		<form action="/game/create/" method="post">
-			{% csrf_token %}
-
-			{% for variant in variants %}
-				<div class="card is-inline-block">
-					<div class="card-image">
-						<figure class="image is-128x128">
-							<img src="{% static 'img/variant-'|add:variant.value|lower|add:'.svg' %}" alt="{{ variant.label }}">
-						</figure>
-					</div>
-
-					<header class="card-header">
-						<p class="card-header-title orbitron">
-							{{ variant.label }}
-						</p>
-					</header>
-
-					<div class="card-content">
-						{{ variant.teams }} teams
-						<br>
-						{{ variant.players }} players
-					</div>
-
-					<div class="card-footer" style="text-align:center">
-						<div class="card-footer-item">
-							<button type="submit" class="button is-primary" name="variant" value="{{ variant.value }}">Create</button>
-						</div>
-					</div>
-				</div>
-			{% endfor %}
-		</form>
-	{% else %}
-		<p>You must be logged in to create a game.</p>
 	{% endif %}
 </div>
 

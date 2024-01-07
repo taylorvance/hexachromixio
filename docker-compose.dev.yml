@@ -1,10 +1,15 @@
 version: '3.8'
 
 services:
+  api:
+    image: taylorvance/hexachromix:api-latest
+    container_name: dev-hexachromix-api
+
   django:
     build:
       context: .
       dockerfile: ./docker/gunicorn/Dockerfile
+    container_name: dev-hexachromix-django
     ports:
       - "8600:8000"
     environment:
@@ -15,12 +20,11 @@ services:
       - "DJANGO_DB_NAME=/data/db.sqlite3"
       - "DJANGO_LOG_LEVEL=DEBUG"
       - "DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8600"
+      - "HEXACHROMIX_API_URI=api"
     volumes:
       - hexachromix_data:/data
-      - staticfiles:/app/staticfiles
       - ./:/app
     command: "python manage.py runserver 0.0.0.0:8000"
 
 volumes:
   hexachromix_data:
-  staticfiles:

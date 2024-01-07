@@ -37,19 +37,15 @@
 
 				<div v-if="!termination_message" class="card">
 					<header class="card-header">
-						<p class="card-header-title">
-							Color picker
-						</p>
+						<p class="card-header-title orbitron">Teams</p>
 					</header>
 					<div class="card-content">
 						<div class="content">
 							<color-picker></color-picker>
-
 							{% if user == game.author %}
 								<hr>
-								<button class="button is-rounded" v-on:click="resetColors()">
-									Reset all colors
-								</button>
+								<button class="button is-warning orbitron" v-on:click="resetColors()">Reset</button>
+								<button class="button orbitron" v-on:click="aiClaimColors()">AI play remaining</button>
 							{% endif %}
 						</div>
 					</div>
@@ -58,7 +54,7 @@
 				{% if request.GET.debug == '1' or user.is_superuser %}
 					<div class="card">
 						<header class="card-header">
-							<p class="card-header-title">Debug</p>
+							<p class="card-header-title orbitron">Debug</p>
 						</header>
 						<div class="card-content help monospace">
 							game id: {{ game.id }}<br>
@@ -68,7 +64,6 @@
 							{% for c in 'RYGCBM' %}
 								{{ c }}: [[ colorPlayers['{{ c }}'] ]]<br>
 							{% endfor %}
-							<br>[[ colorPlayers ]]<br>
 							<pre>{{ game.formatted_hpgn }}</pre>
 						</div>
 					</div>
@@ -87,7 +82,8 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script>
 
-<script src="https://kit.fontawesome.com/7429ed9b88.js" crossorigin="anonymous"></script>
+{% comment %}<script src="https://kit.fontawesome.com/7429ed9b88.js" crossorigin="anonymous"></script>{% endcomment %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <script> var IS_LIVE = true </script>
 {{ game.uid | json_script:"GAMEUID" }}

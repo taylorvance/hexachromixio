@@ -23,6 +23,22 @@ def find_game(request):
     return redirect('/game/%s' % game.code)
 
 @login_required
+def new_game(request):
+    variants = []
+    for variant in Game.Variant:
+        num = len(variant.label.split())
+        variants.append({
+            'label': variant.label,
+            'value': variant.value,
+            'teams': num,
+            'players': '%d%s' % (num, '-6' if num < 6 else ''),
+        })
+
+    return render(request, 'hexachromix/new_game.html', {
+        'variants': variants,
+    })
+
+@login_required
 def create_game(request):
     game = Game(variant=Game.Variant[request.POST['variant']])
     game.author = request.user
