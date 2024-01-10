@@ -6,9 +6,10 @@ services:
     container_name: dev-hexachromix-api
 
   django:
-    build:
-      context: .
-      dockerfile: ./docker/gunicorn/Dockerfile
+    image: taylorvance/hexachromix:gunicorn-latest
+    #build:
+      #context: .
+      #dockerfile: ./docker/gunicorn/Dockerfile
     container_name: dev-hexachromix-django
     ports:
       - "8600:8000"

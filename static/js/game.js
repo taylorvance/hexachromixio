@@ -13,6 +13,15 @@ const store = new Vuex.Store({
 		variant: function(state) {
 			return state.hfen.split(' ')[2]
 		},
+		teams: function(state) {
+			switch(state.hfen.split(' ')[2]) {
+				case 'MRY': return ['MRY', 'GCB']
+				case 'RGB': return ['RGB', 'CMY']
+				case 'MR': return ['MR', 'YG', 'CB']
+				case 'RC': return ['RC', 'BY', 'GM']
+				case 'R': return ['R', 'Y', 'G', 'C', 'B', 'M']
+			}
+		},
 		currentColor: function(state) {
 			return state.hfen.split(' ')[1]
 		},
@@ -48,17 +57,17 @@ Vue.component('board', {
 		variant: function() { return this.effective_hfen.split(' ')[2] },
 		spaceSize: function() { return this.size / store.getters.mapRadius / 2.7 },
 		spaces: function() {
-			var radius = store.getters.mapRadius
-			var spaces = []
+			const radius = store.getters.mapRadius
+			const spaces = []
 
-			var chars = this.effective_hfen.split(' ')[0].replace(/(\d)/g, function(match) {
+			const chars = this.effective_hfen.split(' ')[0].replace(/(\d)/g, function(match) {
 				return '-'.repeat(match)
 			}).split('/').join('')
-			var i = 0
+			let i = 0
 
 			for(q = -radius; q <= radius; q++) {
-				var r1 = Math.max(-radius, -q - radius)
-				var r2 = Math.min(radius, -q + radius)
+				const r1 = Math.max(-radius, -q - radius)
+				const r2 = Math.min(radius, -q + radius)
 
 				for(r = r1; r <= r2; r++) {
 					spaces.push({
@@ -90,7 +99,7 @@ Vue.component('space', {
 		pieceSize: function() { return this.size * 0.4 },
 		pieceOffset: function() { return this.size * 0.3 },
 		canPlay: function() {
-			if(typeof IS_LIVE !== 'undefined' && IS_LIVE === false) return false
+			if(IS_LIVE === false) return false
 			if(store.state.isTerminal) return false
 			if(!this.$parent.$parent.isMyTurn) return false
 
@@ -151,7 +160,7 @@ Vue.component('hexagon', {
 	props: ['x', 'y', 'r', 'fill', 'stroke'],
 	computed: {
 		points: function() {
-			var pts = [
+			const pts = [
 				[this.x, this.y - this.r * Math.sin(Math.PI/2)],
 				[this.x + this.r * Math.cos(Math.PI/6), this.y - this.r * Math.sin(Math.PI/6)],
 				[this.x + this.r * Math.cos(11*Math.PI/6), this.y - this.r * Math.sin(11*Math.PI/6)],
@@ -160,7 +169,7 @@ Vue.component('hexagon', {
 				[this.x + this.r * Math.cos(5*Math.PI/6), this.y - this.r * Math.sin(5*Math.PI/6)],
 			]
 
-			var out = ""
+			let out = ""
 			for(i in pts) {
 				out += pts[i][0] + ',' + pts[i][1] + ' '
 			}
@@ -196,6 +205,8 @@ Vue.component('piece', {
 	</g>`
 })
 
+const PI_THIRDS = Math.PI / 3
+
 Vue.component('logo', {
 	mixins: [colorMixin],
 	delimiters: ['[[', ']]'],
@@ -211,51 +222,46 @@ Vue.component('logo', {
 			}
 		},
 		hexagonPoints: function(size) {
-			var piThirds = Math.PI / 3
-			var pts = []
+			const pts = []
 			for(i = 2; i >= -4; i--) {
 				pts.push([
-					this.x + size * Math.cos(i * piThirds),
-					this.y - size * Math.sin(i * piThirds),
+					this.x + size * Math.cos(i * PI_THIRDS),
+					this.y - size * Math.sin(i * PI_THIRDS),
 				])
 			}
 			return pts
 		},
 		polygonPoints: function(i) {
-			var bigHexPts = this.hexagonPoints(this.size)
-			var smallHexPts = this.hexagonPoints(this.size * 2/3)
-
-			var pts = [bigHexPts[i % 6].join(','), bigHexPts[(i+1) % 6].join(','), smallHexPts[(i+1) % 6].join(','), smallHexPts[i % 6].join(',')]
-			return pts.join(' ')
+			const bigHexPts = this.hexagonPoints(this.size)
+			const smallHexPts = this.hexagonPoints(this.size * 2/3)
+			return [bigHexPts[i % 6].join(','), bigHexPts[(i+1) % 6].join(','), smallHexPts[(i+1) % 6].join(','), smallHexPts[i % 6].join(',')].join(' ')
 		},
 		sideCenterPoints: function(i) {
-			var piThirds = Math.PI / 3
-			var pts = []
+			const pts = []
 			for(j = 1.5; j >= -4.5; j--) {
 				pts.push([
-					this.x + this.size * 0.85 * Math.cos(j * piThirds),
-					this.y - this.size * 0.85 * Math.sin(j * piThirds),
+					this.x + this.size * 0.85 * Math.cos(j * PI_THIRDS),
+					this.y - this.size * 0.85 * Math.sin(j * PI_THIRDS),
 				])
 			}
 			return pts[i]
 		},
 		arrowPoints: function(i) {
-			var piThirds = Math.PI / 3
-			var j = 1.5 - i
-			var pointOffset = this.size * 0.92
-			var armOffset = this.size * 0.96
+			const j = 1.5 - i
+			const pointOffset = this.size * 0.92
+			const armOffset = this.size * 0.96
 			return [
 				[
-					this.x + armOffset * Math.cos((j+0.05) * piThirds),
-					this.y - armOffset * Math.sin((j+0.05) * piThirds),
+					this.x + armOffset * Math.cos((j+0.05) * PI_THIRDS),
+					this.y - armOffset * Math.sin((j+0.05) * PI_THIRDS),
 				].join(','),
 				[
-					this.x + pointOffset * Math.cos(j * piThirds),
-					this.y - pointOffset * Math.sin(j * piThirds),
+					this.x + pointOffset * Math.cos(j * PI_THIRDS),
+					this.y - pointOffset * Math.sin(j * PI_THIRDS),
 				].join(','),
 				[
-					this.x + armOffset * Math.cos((j-0.05) * piThirds),
-					this.y - armOffset * Math.sin((j-0.05) * piThirds),
+					this.x + armOffset * Math.cos((j-0.05) * PI_THIRDS),
+					this.y - armOffset * Math.sin((j-0.05) * PI_THIRDS),
 				].join(','),
 			].join(' ')
 		},
@@ -284,17 +290,8 @@ Vue.component('color-picker', {
 	mixins: [colorMixin],
 	delimiters: ['[[', ']]'],
 	computed: {
-		variantLabel: function() {
-			return this.teams.join(' ')
-		},
 		teams: function() {
-			switch(store.getters.variant) {
-				case 'MRY': return ['MRY', 'GCB']
-				case 'RGB': return ['RGB', 'CMY']
-				case 'MR': return ['MR', 'YG', 'CB']
-				case 'RC': return ['RC', 'BY', 'GM']
-				case 'R': return ['R', 'Y', 'G', 'C', 'B', 'M']
-			}
+			return store.getters.teams
 		},
 		myTeam: function() {
 			for(team of this.teams) {
@@ -316,14 +313,10 @@ Vue.component('color-picker', {
 		},
 		toggleColor: function(color) {
 			if(this.isMine(color)) {
-				store.state.colorPlayers[color] = null
 				this.$parent.releaseColor(color)
 			} else {
-				store.state.colorPlayers[color] = 'me'
 				this.$parent.claimColor(color)
 			}
-
-			//.request color claim, which will broadcast all colors, then commit the state change there
 		},
 		icon: function(color) {
 			if(this.isMine(color)) return 'fa-solid fa-user-circle'
@@ -337,17 +330,16 @@ Vue.component('color-picker', {
 			<span
 				v-for="color in team"
 				:key="color.id"
-				class="icon is-large"
+				class="icon is-large mr-4"
 				v-on:click="canClick(color,team) && toggleColor(color)"
-				style="margin-right:0.5rem;"
 				:style="'color:' + (myTeam&&team!=myTeam ? colors[color].light : colors[color].normal) + '; cursor:' + (canClick(color,team) ? 'pointer' : 'not-allowed')"
 			><i class="fa-3x" :class="icon(color)"></i></span>
-			<hr style="margin: 0.5em 0">
+			<hr class="my-3">
 		</div>
 
 		<div style="text-align:left">
-			<div><span class="icon"><i class="fa-solid fa-user-circle"></i></span>: Me</div>
-			<div><span class="icon"><i class="fa-regular fa-user-circle"></i></span>: Person</div>
+			<div><span class="icon"><i class="fa-solid fa-user-circle"></i></span>: Self</div>
+			<div><span class="icon"><i class="fa-regular fa-user-circle"></i></span>: Player</div>
 			<div><span class="icon"><i class="fa-solid fa-robot"></i></span>: AI</div>
 			<div><span class="icon"><i class="fa-regular fa-circle"></i></span>: Unclaimed</div>
 		</div>
@@ -358,10 +350,9 @@ Vue.component('move-browser', {
 	mixins: [colorMixin],
 	delimiters: ['[[', ']]'],
 	data: function() {
-		var moves = JSON.parse(document.getElementById('move-browser-moves').textContent)
 		return {
 			curIdx: null,
-			moves: moves,
+			moves: JSON.parse(document.getElementById('move-browser-moves').textContent),
 		}
 	},
 	beforeMount: function() {
@@ -411,7 +402,7 @@ Vue.component('move-browser', {
 })
 
 
-var app = new Vue({
+const app = new Vue({
 	mixins: [colorMixin],
 	delimiters: ['[[', ']]'],
 	el: '#app',
@@ -419,6 +410,7 @@ var app = new Vue({
 		socket: undefined,
 		socket_is_live: false,
 		pid: undefined,
+		status: null,
 		termination_message: null,
 	},
 	beforeMount: function() {
@@ -430,10 +422,7 @@ var app = new Vue({
 		this.colors.M.name = 'Magenta'
 
 		if(IS_LIVE !== false) {
-			var game_uid = JSON.parse(document.getElementById('GAMEUID').textContent)
-
-			const uri = (window.location.protocol==='https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/ws/play/' + game_uid + '/'
-
+			const uri = (window.location.protocol==='https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/ws/play/' + GAME_UID + '/'
 			this.socket = new ReconnectingWebSocket(uri)
 			this.socket.onopen = this.socket_opened
 			this.socket.onclose = this.socket_closed
@@ -457,10 +446,10 @@ var app = new Vue({
 			console.error("Disconnected from websocket")
 		},
 		socket_message: function(e) {
-			var data = JSON.parse(e.data)
+			const data = JSON.parse(e.data)
 			console.log("Socket message", data)
 
-			if(typeof data.pid !== 'undefined') this.pid = data.pid
+			if(data.pid !== undefined) this.pid = data.pid
 
 			if(data.hfen) {
 				store.commit('setHfen', data.hfen)
@@ -473,19 +462,24 @@ var app = new Vue({
 				store.commit('setColorPlayers', data.color_players)
 			}
 
-			if(typeof data.termination !== 'undefined') {
+			if(data.termination !== undefined) {
 				store.commit('terminate')
 
 				if(data.termination == 'DRAW') {
 					this.termination_message = "DRAW"
 				} else if('RYGCBM'.includes(data.termination)) {
-					this.termination_message = this.colors[data.termination].name.toUpperCase() + " wins!"
+					const team = store.getters.teams.find(team => team.includes(data.termination))
+					this.termination_message = this.colors[data.termination].name + " wins" + (team && team!=color ? " for "+team : "") + "!"
 				} else {
 					this.termination_message = "GAME OVER"
 				}
+
+				this.status = this.termination_message
+			} else {
+				this.status = this.colors[this.currentColor].name + "'s turn"
 			}
 
-			if(typeof data.error !== 'undefined') {
+			if(data.error !== undefined) {
 				switch(data.error) {
 					case 'OUTDATED_HFEN':
 						alert("You tried to submit a move for an outdated game state. If the board is not updated automatically, please refresh the page.")
@@ -538,6 +532,11 @@ var app = new Vue({
 				'color': this.currentColor,
 				'q': q,
 				'r': r,
+			}))
+		},
+		makeBestMove: function(q, r) {
+			this.socket.send(JSON.stringify({
+				'action': 'make_best_move',
 			}))
 		},
 

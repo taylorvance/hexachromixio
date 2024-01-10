@@ -18,7 +18,7 @@ def find_game(request):
     try:
         game = Game.objects.get(Q(uid=game_identifier) | Q(code=game_identifier))
     except Game.DoesNotExist:
-        return HttpResponse("game %s not found :(" % game_identifier)
+        return HttpResponse("game %s not found" % game_identifier)
 
     return redirect('/game/%s' % game.code)
 
@@ -43,8 +43,7 @@ def create_game(request):
     game = Game(variant=Game.Variant[request.POST['variant']])
     game.author = request.user
     game.save()
-
-    return redirect('/game/%s' % game.uid)
+    return redirect('/game/%s' % game.code)
 
 def view_game(request, game_identifier):
     try:

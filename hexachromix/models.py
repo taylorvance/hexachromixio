@@ -223,7 +223,7 @@ User.add_to_class('hexachromix_games', games_for_user)
 
 def games_my_turn(self):
     my_turn = []
-    for game in Game.objects.filter(gameplayer__player=self).distinct().order_by('-datetime_created'):
+    for game in Game.objects.filter(gameplayer__player=self).distinct().order_by('-datetime_created'):#.sort by oldest most-recent-move instead
         state = game.state
         gp = self.gameplayer_set.filter(game=game, color=state.get_current_color()).first()
         if gp and not state.is_terminal():

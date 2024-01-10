@@ -4,3 +4,4 @@ channels[daphne]
 asgiref
 gunicorn
 daphne
+httpx

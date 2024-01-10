@@ -117,6 +117,11 @@ LOGGING = {
             'level': os.environ.get('DJANGO_LOG_LEVEL', 'WARNING'),
             'propagate': False,
         },
+        'hexachromix': {
+            'handlers': ['console'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'WARNING'),
+            'propagate': False,
+        },
     },
 }
 

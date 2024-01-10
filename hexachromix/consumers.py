@@ -2,15 +2,20 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from django.core.cache import cache
 from channels.db import database_sync_to_async
+
+import os
 import json
 import hashlib
+import urllib.parse, urllib.request
 import logging
+
+import httpx
 
 from hexachromix.models import Game, Move, GamePlayer
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.DEBUG)
 
 
 class PlayConsumer(AsyncWebsocketConsumer):
@@ -29,20 +34,19 @@ class PlayConsumer(AsyncWebsocketConsumer):
         if not game:
             self.close()
 
-        # Generate an identifier for this player so they can reconnect and maintain color control
+        # Generate an identifier for this player so they can reconnect and maintain color control.
         if self.scope['user'].is_authenticated:
-            # This allows a user to maintain colors across devices
-            # If this changes, update get_color_players()
+            # This allows an authenticated user to maintain colors across devices.
+            # If this changes, update get_color_players().
             self.player_identifier = f'user:{self.scope["user"].username}'
         elif self.scope['session'].session_key:
-            # Hash based on ses key, game uid, and salt
-            #.move the salt to untracked cfg
+            # Hash based on ses key, game uid, and salt.
             hashid = f'{self.scope["session"].session_key} - {self.game_uid} - makes my steaks taste great'
             hashid = hashlib.md5(hashid.encode('utf-8')).hexdigest()
-            hashid = str(hashid)[:12]
+            hashid = str(hashid)[:16]
             self.player_identifier = f'anon:{hashid}'
         else:
-            # If they somehow don't have a session, treat them all the same
+            # If they somehow don't have a session, treat them all the same.
             self.player_identifier = 'anon:whoareyou'
 
         logger.info(f'PlayConsumer: {self.player_identifier} connected to {self.game_uid}')
@@ -62,6 +66,8 @@ class PlayConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 'termination': 'generic game over',
             }))
+
+        await self.check_ai()
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
@@ -83,19 +89,17 @@ class PlayConsumer(AsyncWebsocketConsumer):
 
             cache_val = await self.get_color_players()
             remaining_colors = [c for c in 'RYGCBM' if not cache_val.get(c)]
-
             for color in remaining_colors:
                 cache_val[color] = 'ai:v1'
 
             await async_cache_set(f'game_{self.game_uid}_colors', cache_val, 3600)
 
-            await self.channel_layer.group_send(
-                self.group_name,
-                {
-                    'type': 'broadcast_color_players',
-                    'color_players': cache_val,
-                }
-            )
+            await self.channel_layer.group_send(self.group_name, {
+                'type': 'broadcast_color_players',
+                'color_players': cache_val,
+            })
+
+            await self.check_ai()
         elif text_data_json['action'] == 'release_color':
             color = Move.Color[text_data_json['color']]
 
@@ -116,16 +120,16 @@ class PlayConsumer(AsyncWebsocketConsumer):
 
             await async_cache_set(f'game_{self.game_uid}_colors', cache_val, 3600)
 
-            await self.channel_layer.group_send(
-                self.group_name,
-                {
-                    'type': 'broadcast_color_players',
-                    'color_players': cache_val,
-                }
-            )
+            await self.channel_layer.group_send(self.group_name, {
+                'type': 'broadcast_color_players',
+                'color_players': cache_val,
+            })
         elif text_data_json['action'] == 'reset_colors':
             await self.reset_colors()
+        elif text_data_json['action'] == 'make_best_move':#.del and all calling code in the client
+            await self.check_ai()
         elif text_data_json['action'] == 'make_move':
+            #.move all of this into a function so we can use it for ai moves too
             game = await fetch_game(self.game_uid)
             hfen = await fetch_game_hfen(game)
 
@@ -139,7 +143,7 @@ class PlayConsumer(AsyncWebsocketConsumer):
 
             # Is it that color's turn?
             color = text_data_json['color']
-            expected_color = hfen.split(' ')[1]
+            expected_color = hfen.split()[1]
             if color != expected_color:
                 await self.send(text_data=json.dumps({
                     'error': 'OUT_OF_TURN',
@@ -188,26 +192,91 @@ class PlayConsumer(AsyncWebsocketConsumer):
 
             # Is the game over?
             if state.did_win():
-                await self.channel_layer.group_send(self.group_name, {'type':'broadcast_game_over', 'result':'RYGCBM'[state.prev_color_idx]})
+                await self.channel_layer.group_send(self.group_name, {
+                    'type': 'broadcast_game_over',
+                    'result': 'RYGCBM'[state.prev_color_idx],
+                })
                 # Delete the color-player cache
                 await async_cache_delete(f'game_{self.game_uid}_colors')
             elif len(state.get_legal_moves()) == 0:
-                await self.channel_layer.group_send(self.group_name, {'type':'broadcast_game_over', 'result':'DRAW'})
+                await self.channel_layer.group_send(self.group_name, {
+                    'type': 'broadcast_game_over',
+                    'result': 'DRAW',
+                })
                 # Delete the color-player cache
                 await async_cache_delete(f'game_{self.game_uid}_colors')
 
             # Broadcast the new HFEN to everyone
-            await self.channel_layer.group_send(
-                self.group_name,
-                {
-                    'type': 'broadcast_hfen',
-                    'hfen': hfen,
-                    'move': [move.color, move.q, move.r],
-                }
-            )
+            await self.channel_layer.group_send(self.group_name, {
+                'type': 'broadcast_hfen',
+                'hfen': hfen,
+                'move': [move.color, move.q, move.r],
+            })
 
-            # Is the new current player an AI?
+            await self.check_ai()
 
+
+    async def check_ai(self):
+        game = await fetch_game(self.game_uid)
+        hfen = await fetch_game_hfen(game)
+
+        color = hfen.split()[1]
+        color_players = await self.get_color_players()
+        if not str(color_players.get(color)).startswith('ai:'):
+            return False
+
+        # -- THE FOLLOWING IS DUPLICATED FROM THE MAKE_MOVE ACTION --
+
+        # Is the game over?
+        state = Game.state_from_hfen(hfen)
+        if state.is_terminal():
+            return False
+
+        best_move = await find_best_move(hfen)
+        if not best_move:
+            await self.send(text_data=json.dumps({'error': 'Something went wrong in find_best_move.'}))
+            return False
+
+        # Is the move legal?
+        q = best_move['q']
+        r = best_move['r']
+        if (q,r) not in state.get_legal_moves():
+            await self.send(text_data=json.dumps({'error': 'The AI went haywire.'}))
+            return False
+
+        # Make the move
+        move = Move()
+        move.game = game
+        move.color = best_move['color']
+        move.q = q
+        move.r = r
+        await save_move(move)
+
+        state = state.make_move((q, r))
+        hfen = state.hfen
+
+        # Is the game over?
+        if state.did_win():
+            await self.channel_layer.group_send(self.group_name, {
+                'type': 'broadcast_game_over',
+                'result': 'RYGCBM'[state.prev_color_idx],
+            })
+            await async_cache_delete(f'game_{self.game_uid}_colors')
+        elif len(state.get_legal_moves()) == 0:
+            await self.channel_layer.group_send(self.group_name, {
+                'type': 'broadcast_game_over',
+                'result': 'DRAW',
+            })
+            await async_cache_delete(f'game_{self.game_uid}_colors')
+
+        # Broadcast the new HFEN to everyone
+        await self.channel_layer.group_send(self.group_name, {
+            'type': 'broadcast_hfen',
+            'hfen': hfen,
+            'move': [move.color, move.q, move.r],
+        })
+
+        await self.check_ai()
 
     async def claim_color(self, color:str):
         color = Move.Color[color]
@@ -242,13 +311,10 @@ class PlayConsumer(AsyncWebsocketConsumer):
 
         await async_cache_set(f'game_{self.game_uid}_colors', cache_val, 3600)
 
-        await self.channel_layer.group_send(
-            self.group_name,
-            {
-                'type': 'broadcast_color_players',
-                'color_players': cache_val,
-            }
-        )
+        await self.channel_layer.group_send(self.group_name, {
+            'type': 'broadcast_color_players',
+            'color_players': cache_val,
+        })
 
     async def reset_colors(self):
         # Is this the game author?
@@ -262,13 +328,10 @@ class PlayConsumer(AsyncWebsocketConsumer):
         await delete_game_players(self.game_uid)
         await async_cache_delete(f'game_{self.game_uid}_colors')
 
-        await self.channel_layer.group_send(
-            self.group_name,
-            {
-                'type': 'broadcast_color_players',
-                'color_players': {},
-            }
-        )
+        await self.channel_layer.group_send(self.group_name, {
+            'type': 'broadcast_color_players',
+            'color_players': {},
+        })
 
     async def get_color_players(self):
         cache_key = f'game_{self.game_uid}_colors'
@@ -328,6 +391,27 @@ def delete_game_players(game_uid):
 @database_sync_to_async
 def save_move(move):
     move.save()
+
+MAX_TIME = int(os.environ.get('HEXACHROMIX_AI_MAX_TIME', 1))
+MAX_ITERATIONS = int(os.environ.get('HEXACHROMIX_AI_MAX_ITERATIONS', 10000))
+async def find_best_move(hfen1):
+    logger.debug(f'finding best move for {hfen1}')
+    url = 'http://api/best/?' + urllib.parse.urlencode({'hfen':hfen1, 'max_time':MAX_TIME, 'max_iterations':MAX_ITERATIONS})
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        hfen2 = response.json()
+        logger.debug(f'best move for {hfen1} is {hfen2}')
+
+    state = Game.state_from_hfen(hfen1)
+    for move in state.get_legal_moves():
+        if state.make_move(move).hfen == hfen2:
+            logger.debug(f'move {move} matches')
+            return {
+                'hfen': hfen2,
+                'q': move[0],
+                'r': move[1],
+                'color': hfen1.split()[1],
+            }
 
 @sync_to_async
 def async_cache_get(key): return cache.get(key)

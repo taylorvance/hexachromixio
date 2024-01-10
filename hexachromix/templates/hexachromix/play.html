@@ -8,33 +8,24 @@
 <div class="content">
 	<div id="app">
 		<div class="columns is-desktop">
-			<div class="column" style="text-align:center">
-				<svg viewbox="0 0 100 100" style="width:80vmin; height:80vmin;">
-					<circle cx="4" cy="4" r="1.25" stroke="#555" stroke-width="0.35" :fill="[[ socket_is_live ? '#0c0' : '#d00' ]]"/>
-					<text x="6.5" y="4" fill="#555" style="font-size:0.25rem; text-anchor:left; dominant-baseline:central; pointer-events:none;">
-						[[ socket_is_live ? 'Live' : 'Disconnected' ]]
-					</text>
+			<div class="column">
+				<h3 class="orbitron has-text-centered mb-0">[[ termination_message || status ]]</h3>
 
-					<board :x=50 :y=50 :size=50 />
+				<div v-if="!termination_message">
+					<span class="icon-text" :class="[[ socket_is_live ? 'has-text-success' : 'has-text-danger' ]]">
+						<span class="icon">
+							<i class="fas" :class="[[ socket_is_live ? 'fa-check-circle' : 'fa-exclamation-circle' ]]"></i>
+						</span>
+						<span class="orbitron">[[ socket_is_live ? 'Connected' : 'Disconnected' ]]</span>
+					</span>
+				</div>
+
+				<svg viewbox="0 0 100 96" style="width:80vmin; height:80vmin;">
+					<board :x=50 :y=48 :size=50 />
 				</svg>
 			</div>
 
 			<div class="column">
-				{% comment %}
-				<div class="card">
-					<header class="card-header">
-						<p class="card-header-title">
-							Game {{ game.uid }}
-						</p>
-					</header>
-					<div class="card-content">
-						<div class="content">
-							Variant: {{ game.get_variant_display }}
-						</div>
-					</div>
-				</div>
-				{% endcomment %}
-
 				<div v-if="!termination_message" class="card">
 					<header class="card-header">
 						<p class="card-header-title orbitron">Teams</p>
@@ -52,19 +43,22 @@
 				</div>
 
 				{% if request.GET.debug == '1' or user.is_superuser %}
+					<button class="button is-primary orbitron" v-on:click="makeBestMove()">Best Move</button>
 					<div class="card">
 						<header class="card-header">
 							<p class="card-header-title orbitron">Debug</p>
 						</header>
 						<div class="card-content help monospace">
-							game id: {{ game.id }}<br>
-							hfen: [[ hfen ]]<br>
-							pid: [[ pid ]]<br>
-							<br>
-							{% for c in 'RYGCBM' %}
-								{{ c }}: [[ colorPlayers['{{ c }}'] ]]<br>
-							{% endfor %}
-							<pre>{{ game.formatted_hpgn }}</pre>
+							<div class="mb-2">
+								identifiers: {{ game.id }} {{ game.uid }} {{ game.code }}<br>
+								hfen: [[ hfen ]]<br>
+								pid: [[ pid ]]<br>
+							</div>
+							<div class="mb-2">
+								{% for c in 'RYGCBM' %}
+									{{ c }}: [[ colorPlayers['{{ c }}'] ]]<br>
+								{% endfor %}
+							</div>
 						</div>
 					</div>
 				{% endif %}
@@ -85,7 +79,9 @@
 {% comment %}<script src="https://kit.fontawesome.com/7429ed9b88.js" crossorigin="anonymous"></script>{% endcomment %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-<script> var IS_LIVE = true </script>
-{{ game.uid | json_script:"GAMEUID" }}
+<script>
+	const IS_LIVE = true
+	const GAME_UID = "{{ game.uid }}"
+</script>
 <script src="{% static "js/game.js" %}"></script>
 {% endblock scripts %}
