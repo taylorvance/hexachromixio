@@ -11,6 +11,7 @@ class FriendRequest(models.Model):
         YES = 1, _('Accepted')
         __empty__ = _('Pending')
 
+    id = models.AutoField(primary_key=True)
     requester = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='friend_requesters')
     responder = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='friend_responders')
     status = models.IntegerField(choices=Status.choices, null=True)

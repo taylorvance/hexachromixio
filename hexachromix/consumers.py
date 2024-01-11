@@ -15,7 +15,7 @@ from hexachromix.models import Game, Move, GamePlayer
 
 
 logger = logging.getLogger(__name__)
-# logger.setLevel(logging.DEBUG)
+logger.debug(f'using logger {__name__}')
 
 
 class PlayConsumer(AsyncWebsocketConsumer):
@@ -53,7 +53,6 @@ class PlayConsumer(AsyncWebsocketConsumer):
 
         hfen = await fetch_game_hfen(game)
         color_players = await self.get_color_players()
-        logger.debug(f'hfen={hfen}, color_players={color_players}')
 
         await self.send(text_data=json.dumps({
             'pid': self.player_identifier,

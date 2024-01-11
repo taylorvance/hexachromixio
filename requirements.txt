@@ -1,7 +1,6 @@
-hexachromix==0.2.5
-cython
-channels[daphne]
-asgiref
 gunicorn
 daphne
+channels[daphne]
+asgiref
+celery
 httpx

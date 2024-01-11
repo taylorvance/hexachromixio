@@ -143,7 +143,8 @@
 			<thead>
 				<tr>
 					{% if user.is_staff %}
-						<th>id/uid</th>
+						<th>id</th>
+						<th>uid</th>
 						<th>Author</th>
 					{% endif %}
 					<th>Game Code</th>
@@ -157,7 +158,8 @@
 				{% for game in games %}
 					<tr>
 						{% if user.is_staff %}
-							<td class="monospace">{{ game.id }} {{ game.uid }}</td>
+							<td class="monospace">{{ game.id }}</td>
+							<td class="monospace">{{ game.uid }}</td>
 							<td><a href="/profile/{{ game.author.username }}/">{{ game.author.username }}</a></td>
 						{% endif %}
 						<td><a class="monospace" href="/game/{{ game.code }}">{{ game.code }}</a></td>

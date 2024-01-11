@@ -44,16 +44,20 @@ class Game(models.Model):
         with open(os.path.join(os.path.dirname(__file__), 'wordlist.txt'), 'r') as file:
             words = [word.strip() for word in file.readlines()]
 
-        while True:
-            code = '-'.join(random.sample(words, 3))
-            if not Game.objects.filter(code=code).exists():
-                return code
+        for n in (2,3,4): # Try n times to find an n-char unique code.
+            for _ in range(n):
+                code = '-'.join(random.sample(words, n))
+                if not Game.objects.filter(code=code).exists():
+                    return code
+
+        raise Exception('Could not generate unique code.')
 
     # Model fields
+    id = models.AutoField(primary_key=True)
     datetime_created = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.RESTRICT)
     uid = models.CharField(max_length=12, unique=True, default=gen_uid, editable=False)
-    code = models.CharField(max_length=26, unique=True, default=gen_code, editable=False) # The longest word is 8 chars. Worst case, all 3 words are 8 chars: 8*3 + 2[spaces] = 26
+    code = models.CharField(max_length=26, unique=True, default=gen_code, editable=False)
     variant = models.CharField(choices=Variant.choices, max_length=3, editable=False)
 
 
@@ -185,12 +189,15 @@ class Move(models.Model):
         B = 'B', _('Blue')
         M = 'M', _('Magenta')
 
+    id = models.AutoField(primary_key=True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     player = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
     datetime_created = models.DateTimeField(auto_now_add=True)
     color = models.CharField(choices=Color.choices, max_length=1)
     q = models.SmallIntegerField()
     r = models.SmallIntegerField()
+    hfen = models.CharField(max_length=32, null=True, editable=False)#.make required
+    details = models.TextField(null=True)
 
     @property
     def hfen(self):
@@ -208,15 +215,18 @@ class Move(models.Model):
 
 
 class GamePlayer(models.Model):
+    id = models.AutoField(primary_key=True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     color = models.CharField(choices=Move.Color.choices, max_length=1)
 
 
-# Extend the User model with a helper method to find all of their games
-# Games where they are the author, a game-player, or a move-player
 User = get_user_model()
 
+# Extend the User model with a helper method to find all of their games:
+#  - they authored it,
+#  - they're a GamePlayer in it, or
+#  - they're the author of a move in it.
 def games_for_user(self):
     return Game.objects.filter(Q(author=self) | Q(gameplayer__player=self) | Q(move__player=self)).distinct()
 User.add_to_class('hexachromix_games', games_for_user)
