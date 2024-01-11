@@ -79,7 +79,11 @@ WSGI_APPLICATION = 'hexachromixio.wsgi.application'
 ASGI_APPLICATION = 'hexachromixio.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+        # "BACKEND": "channels.layers.InMemoryChannelLayer"
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis",6379)],
+        }
     },
 }
 
@@ -102,7 +106,9 @@ DATABASES = {
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        # 'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://redis:6379',
     }
 }
 

@@ -1,6 +1,7 @@
 gunicorn
 daphne
 channels[daphne]
+channels-redis
 asgiref
 redis
 celery

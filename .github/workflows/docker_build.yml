@@ -1,4 +1,4 @@
-name: Rebuild All Docker Images
+name: Rebuild Docker Image
 
 on:
   push:
@@ -39,24 +39,10 @@ jobs:
           username: taylorvance
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Build Nginx Docker Image
+      - name: Build Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: ./docker/nginx/
+          context: .
           platforms: linux/arm64
           push: true
-          tags: taylorvance/hexachromix:web-latest
-      - name: Build Gunicorn Docker Image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./docker/gunicorn/
-          platforms: linux/arm64
-          push: true
-          tags: taylorvance/hexachromix:gunicorn-latest
-      - name: Build Daphne Docker Image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./docker/daphne/
-          platforms: linux/arm64
-          push: true
-          tags: taylorvance/hexachromix:daphne-latest
+          tags: taylorvance/hexachromixio:latest
