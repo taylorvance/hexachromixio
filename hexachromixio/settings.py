@@ -83,6 +83,9 @@ CHANNEL_LAYERS = {
     },
 }
 
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://redis:6379'
+
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases

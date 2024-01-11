@@ -196,18 +196,16 @@ class Move(models.Model):
     color = models.CharField(choices=Color.choices, max_length=1)
     q = models.SmallIntegerField()
     r = models.SmallIntegerField()
-    hfen = models.CharField(max_length=32, null=True, editable=False)#.make required
+    # hfen = models.CharField(max_length=32, null=True, editable=False)#.make required
     details = models.TextField(null=True)
 
     @property
     def hfen(self):
         state = HexachromixState(variant=self.game.variant)
-
         for move in self.game.moves:
             state = state.make_move((move.q, move.r))
             if self is move:
                 break
-
         return state.hfen
 
     class Meta:

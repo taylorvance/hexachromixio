@@ -7,11 +7,14 @@ services:
       - "8600:80"
     volumes:
       - static:/app/staticfiles
+      - ./:/app
     depends_on:
       - gunicorn
+      - daphne
 
   gunicorn:
-    image: taylorvance/hexachromix:gunicorn-latest
+    image: taylorvance/hexachromixio:latest
+    command: "gunicorn -b 0.0.0.0:8000 hexachromixio.wsgi:application"
     environment:
       - "DJANGO_SECRET_KEY=rope-those-lushly"
       - "DJANGO_DEBUG=True"
@@ -21,12 +24,13 @@ services:
       - "DJANGO_LOG_LEVEL=DEBUG"
       - "DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8600"
     volumes:
-      - db:/data
+      - hexachromix_data:/data
       - static:/app/staticfiles
       - ./:/app
 
   daphne:
-    image: taylorvance/hexachromix:daphne-latest
+    image: taylorvance/hexachromixio:latest
+    command: "daphne -b 0.0.0.0 -p 8001 hexachromixio.asgi:application"
     environment:
       - "DJANGO_SECRET_KEY=rope-those-lushly"
       - "DJANGO_DEBUG=True"
@@ -36,9 +40,9 @@ services:
       - "DJANGO_LOG_LEVEL=DEBUG"
       - "DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8600"
     volumes:
-      - db:/data
+      - hexachromix_data:/data
       - ./:/app
 
 volumes:
-  db:
+  hexachromix_data:
   static:

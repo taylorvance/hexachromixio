@@ -9,7 +9,7 @@
 	<div id="app">
 		<div class="columns is-desktop">
 			<div class="column">
-				<h3 class="orbitron has-text-centered mb-0">[[ termination_message || status ]]</h3>
+				<h3 class="orbitron has-text-centered mb-0">[[ termination_message || status_message ]]</h3>
 
 				<div v-if="!termination_message">
 					<span class="icon-text" :class="[[ socket_is_live ? 'has-text-success' : 'has-text-danger' ]]">

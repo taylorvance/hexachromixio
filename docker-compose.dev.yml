@@ -6,11 +6,9 @@ services:
     container_name: dev-hexachromix-api
 
   django:
-    image: taylorvance/hexachromix:gunicorn-latest
-    #build:
-      #context: .
-      #dockerfile: ./docker/gunicorn/Dockerfile
+    image: taylorvance/hexachromixio:latest
     container_name: dev-hexachromix-django
+    command: "python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8600:8000"
     environment:
@@ -21,11 +19,29 @@ services:
       - "DJANGO_DB_NAME=/data/db.sqlite3"
       - "DJANGO_LOG_LEVEL=DEBUG"
       - "DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8600"
-      - "HEXACHROMIX_API_URI=api"
     volumes:
       - hexachromix_data:/data
       - ./:/app
-    command: "python manage.py runserver 0.0.0.0:8000"
+
+  redis:
+    image: redis
+    container_name: dev-hexachromix-redis
+
+  celery:
+    image: taylorvance/hexachromixio:latest
+    container_name: dev-hexachromix-celery
+    command: "celery -A hexachromixio worker -l debug"
+    environment:
+      - "DJANGO_SECRET_KEY=rope-those-lushly"
+      - "DJANGO_DEBUG=True"
+      - "DJANGO_ALLOWED_HOSTS=localhost"
+      - "DJANGO_DB_ENGINE=django.db.backends.sqlite3"
+      - "DJANGO_DB_NAME=/data/db.sqlite3"
+      - "DJANGO_LOG_LEVEL=DEBUG"
+      - "DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8600"
+    volumes:
+      - hexachromix_data:/data
+      - ./:/app
 
 volumes:
   hexachromix_data:

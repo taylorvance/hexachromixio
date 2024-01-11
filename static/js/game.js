@@ -350,9 +350,10 @@ Vue.component('move-browser', {
 	mixins: [colorMixin],
 	delimiters: ['[[', ']]'],
 	data: function() {
+		const moveEl = document.getElementById('move-browser-moves')
 		return {
 			curIdx: null,
-			moves: JSON.parse(document.getElementById('move-browser-moves').textContent),
+			moves: (moveEl ? JSON.parse(moveEl.textContent) : []),
 		}
 	},
 	beforeMount: function() {
@@ -410,7 +411,7 @@ const app = new Vue({
 		socket: undefined,
 		socket_is_live: false,
 		pid: undefined,
-		status: null,
+		status_message: null,
 		termination_message: null,
 	},
 	beforeMount: function() {
@@ -474,9 +475,9 @@ const app = new Vue({
 					this.termination_message = "GAME OVER"
 				}
 
-				this.status = this.termination_message
+				this.status_message = this.termination_message
 			} else {
-				this.status = this.colors[this.currentColor].name + "'s turn"
+				this.status_message = this.colors[this.currentColor].name + "'s turn"
 			}
 
 			if(data.error !== undefined) {

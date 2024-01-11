@@ -2,5 +2,5 @@ gunicorn
 daphne
 channels[daphne]
 asgiref
+redis
 celery
-httpx
