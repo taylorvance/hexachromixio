@@ -1,15 +1,19 @@
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from django.utils.functional import cached_property
 from django.db.models import Q
+from django.db.models.signals import pre_save
 from django.contrib.auth import get_user_model
+from django.dispatch import receiver
 
 import os
 from time import time
 import random, re
+import logging
 
 from hexachromix.utils import HexachromixState
+
+logger = logging.getLogger(__name__)
 
 
 class Game(models.Model):
@@ -162,16 +166,14 @@ class Game(models.Model):
     def players(self):
         return get_user_model().objects.filter(gameplayer__game=self).distinct()
 
-    @cached_property
+    @property
     def hfen(self):
         state = HexachromixState(variant=self.variant)
-
         for move in self.moves:
             state = state.make_move((move.q, move.r))
-
         return state.hfen
 
-    @cached_property
+    @property
     def state(self):
         return self.state_from_hfen(self.hfen)
 
@@ -196,20 +198,27 @@ class Move(models.Model):
     color = models.CharField(choices=Color.choices, max_length=1)
     q = models.SmallIntegerField()
     r = models.SmallIntegerField()
-    # hfen = models.CharField(max_length=32, null=True, editable=False)#.make required
+    hfen = models.CharField(max_length=32, null=True, editable=False)
     details = models.TextField(null=True)
-
-    @property
-    def hfen(self):
-        state = HexachromixState(variant=self.game.variant)
-        for move in self.game.moves:
-            state = state.make_move((move.q, move.r))
-            if self is move:
-                break
-        return state.hfen
 
     class Meta:
         order_with_respect_to = 'game'
+
+    @receiver(pre_save, sender='hexachromix.Move')
+    def fill_hfen(sender, instance, *args, **kwargs):
+        if not instance.hfen:
+            instance.hfen = instance.calc_hfen()
+
+    def calc_hfen(self):
+        #.instead: find the last game move (in _order) before this one that has an hfen, or the first move of the game if none do.
+        state = HexachromixState(variant=self.game.variant)
+        for move in self.game.moves:
+            state = state.make_move((move.q, move.r))
+            if move == self:
+                return state.hfen
+        # If we got through all the game's moves and this move is new, then assume it's the latest move in the game and should have the current state's hfen.
+        if not self.id:
+            return state.make_move((self.q, self.r)).hfen
 
 
 class GamePlayer(models.Model):

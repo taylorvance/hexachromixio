@@ -64,8 +64,6 @@ class PlayConsumer(AsyncWebsocketConsumer):
                 'termination': 'generic game over',
             }))
 
-        check_ai.delay(self.game_uid)
-
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
@@ -95,8 +93,6 @@ class PlayConsumer(AsyncWebsocketConsumer):
                 'type': 'broadcast_color_players',
                 'color_players': cache_val,
             })
-
-            check_ai.delay(self.game_uid)
         elif text_data_json['action'] == 'release_color':
             color = Move.Color[text_data_json['color']]
 
@@ -123,7 +119,7 @@ class PlayConsumer(AsyncWebsocketConsumer):
             })
         elif text_data_json['action'] == 'reset_colors':
             await self.reset_colors()
-        elif text_data_json['action'] == 'make_best_move':#.del and all calling code in the client
+        elif text_data_json['action'] == 'make_ai_move':
             check_ai.delay(self.game_uid)
         elif text_data_json['action'] == 'make_move':
             #.move all of this into a function so we can use it for ai moves too
@@ -210,8 +206,6 @@ class PlayConsumer(AsyncWebsocketConsumer):
                 'move': [move.color, move.q, move.r],
             })
 
-            check_ai.delay(self.game_uid)
-
 
     async def claim_color(self, color:str):
         color = Move.Color[color]
@@ -286,7 +280,6 @@ class PlayConsumer(AsyncWebsocketConsumer):
         return cache_val
 
     async def broadcast_hfen(self, event):
-        logger.debug('check_ai: YES, broadcasting!')
         await self.send(text_data=json.dumps({
             'hfen': event['hfen'],
             'move': event['move'],

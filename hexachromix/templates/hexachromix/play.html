@@ -43,7 +43,6 @@
 				</div>
 
 				{% if request.GET.debug == '1' or user.is_superuser %}
-					<button class="button is-primary orbitron" v-on:click="makeBestMove()">Best Move</button>
 					<div class="card">
 						<header class="card-header">
 							<p class="card-header-title orbitron">Debug</p>
@@ -82,6 +81,7 @@
 <script>
 	const IS_LIVE = true
 	const GAME_UID = "{{ game.uid }}"
+	const GAME_AUTHOR = "{{ game.author }}"
 </script>
 <script src="{% static "js/game.js" %}"></script>
 {% endblock scripts %}

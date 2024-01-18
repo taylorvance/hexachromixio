@@ -43,6 +43,24 @@ services:
       - hexachromix_data:/data
       - ./:/app
 
+  celery:
+    image: taylorvance/hexachromixio:latest
+    command: "celery -A hexachromixio worker -l info"
+    environment:
+      - "DJANGO_SECRET_KEY=rope-those-lushly"
+      - "DJANGO_DEBUG=True"
+      - "DJANGO_ALLOWED_HOSTS=localhost"
+      - "DJANGO_DB_ENGINE=django.db.backends.sqlite3"
+      - "DJANGO_DB_NAME=/data/db.sqlite3"
+      - "DJANGO_LOG_LEVEL=DEBUG"
+      - "DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8600"
+    volumes:
+      - hexachromix_data:/data
+      - ./:/app
+
+  redis:
+    image: redis
+
 volumes:
   hexachromix_data:
   static:

@@ -408,11 +408,12 @@ const app = new Vue({
 	delimiters: ['[[', ']]'],
 	el: '#app',
 	data: {
-		socket: undefined,
+		socket: null,
 		socket_is_live: false,
-		pid: undefined,
+		pid: null,
 		status_message: null,
 		termination_message: null,
+		ai_interval: null,
 	},
 	beforeMount: function() {
 		this.colors.R.name = 'Red'
@@ -431,11 +432,28 @@ const app = new Vue({
 			this.socket.onerror = this.socket_error
 		}
 	},
+	mounted: function() {
+		// The author should frequently check if it's the AI's turn.
+		// If so, the author will ask the server to make a move.
+		this.polling = setInterval(() => {
+			if(this.amAuthor && this.isAITurn) this.triggerAI()
+		}, 1000)
+	},
+	beforeDestroy: function() {
+		if(this.ai_interval) {
+			clearInterval(this.ai_interval)
+		}
+		if(this.socket) {
+			this.socket.close()
+		}
+	},
 	computed: {
 		hfen: function() { return store.state.hfen },
 		currentColor: function() { return store.getters.currentColor },
 		colorPlayers: function() { return store.state.colorPlayers },
-		isMyTurn: function() { return store.state.colorPlayers[this.currentColor] == this.pid },
+		isMyTurn: function() { return this.colorPlayers[this.currentColor] == this.pid },
+		isAITurn: function() { return this.colorPlayers[this.currentColor] && this.colorPlayers[this.currentColor].startsWith('ai:') },
+		amAuthor: function() { return this.pid == 'user:'+GAME_AUTHOR },
 	},
 	methods: {
 		socket_opened: function(e) {
@@ -527,17 +545,19 @@ const app = new Vue({
 		},
 
 		makeMove: function(q, r) {
-			this.socket.send(JSON.stringify({
-				'action': 'make_move',
-				'hfen': this.hfen,
-				'color': this.currentColor,
-				'q': q,
-				'r': r,
-			}))
+			if(confirm("Confirm move?")) {
+				this.socket.send(JSON.stringify({
+					'action': 'make_move',
+					'hfen': this.hfen,
+					'color': this.currentColor,
+					'q': q,
+					'r': r,
+				}))
+			}
 		},
-		makeBestMove: function(q, r) {
+		triggerAI: function() {
 			this.socket.send(JSON.stringify({
-				'action': 'make_best_move',
+				'action': 'make_ai_move',
 			}))
 		},
 

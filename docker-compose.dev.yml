@@ -37,7 +37,7 @@ services:
       - "DJANGO_ALLOWED_HOSTS=localhost"
       - "DJANGO_DB_ENGINE=django.db.backends.sqlite3"
       - "DJANGO_DB_NAME=/data/db.sqlite3"
-      - "DJANGO_LOG_LEVEL=DEBUG"
+      - "DJANGO_LOG_LEVEL=INFO"
       - "DJANGO_CSRF_TRUSTED_ORIGINS=http://localhost:8600"
     volumes:
       - hexachromix_data:/data
