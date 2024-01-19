@@ -10,7 +10,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && rm requirements.txt
 
 # Copy the local repo and clone it.
-COPY .git /tmp/repo
+COPY . /tmp/repo
 RUN git clone /tmp/repo . && rm -rf /tmp/repo
 
 RUN python manage.py collectstatic --noinput
