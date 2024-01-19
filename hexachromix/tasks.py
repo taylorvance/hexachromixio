@@ -8,6 +8,7 @@ import logging
 import urllib
 import json
 from time import time
+from base64 import b64encode
 
 from hexachromix.models import Game, Move
 
@@ -101,20 +102,30 @@ def check_ai(game_uid):
         cache.delete(lock_key)
 
 
-API_URL = os.environ.get('HEXACHROMIX_API_URL', 'http://api')
-MAX_TIME = int(os.environ.get('HEXACHROMIX_AI_MAX_TIME', 1))
-MAX_ITERATIONS = int(os.environ.get('HEXACHROMIX_AI_MAX_ITERATIONS', 100000))
 def find_best_move(hfen1):
-    mt = MAX_TIME
-    mi = MAX_ITERATIONS
-
     logger.debug(f'finding best move for {hfen1}')
-    url = API_URL + '/best/?' + urllib.parse.urlencode({'hfen':hfen1, 'max_time':mt, 'max_iterations':mi})
+
+    mt = int(os.environ.get('HEXACHROMIX_AI_MAX_TIME', 1))
+    mi = int(os.environ.get('HEXACHROMIX_AI_MAX_ITERATIONS', 100000))
+
+    apiuser = os.getenv('HEXACHROMIX_API_USER')
+    apipass = os.getenv('HEXACHROMIX_API_PASS')
+    if apiuser and apipass:
+        creds = b64encode(f'{apiuser}:{apipass}'.encode()).decode()
+        headers = {'Authorization': f'Basic {creds}'}
+    else:
+        headers = {}
+
+    apiurl = os.environ.get('HEXACHROMIX_API_URL', 'http://api') + '/best/?' + urllib.parse.urlencode({'hfen':hfen1, 'max_time':mt, 'max_iterations':mi})
+
     #.use httpx instead. make it async to avoid blocking.
     t = time()
-    response = urllib.request.urlopen(url)
+    req = urllib.request.Request(apiurl, headers=headers)
+    with urllib.request.urlopen(req) as res:
+        data = json.loads(res.read().decode('utf-8'))
     t = time() - t
-    hfen2 = json.loads(response.read().decode('utf-8'))
+
+    hfen2 = data
 
     state = Game.state_from_hfen(hfen1)
     for move in state.get_legal_moves():
