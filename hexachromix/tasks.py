@@ -9,6 +9,9 @@ import urllib
 import json
 from time import time
 from base64 import b64encode
+import asyncio
+
+import httpx
 
 from hexachromix.models import Game, Move
 
@@ -48,7 +51,7 @@ def check_ai(game_uid):
         logger.debug('check_ai: √ game not terminal')
 
         logger.info(f'{game_uid}: Finding best move for "{hfen}"...')
-        best_move = find_best_move(hfen)
+        best_move = asyncio.run(find_best_move(hfen))
         if not best_move:
             logger.debug('check_ai: X no best move')
             return
@@ -102,8 +105,8 @@ def check_ai(game_uid):
         cache.delete(lock_key)
 
 
-def find_best_move(hfen1):
-    logger.debug(f'finding best move for {hfen1}')
+async def find_best_move(hfen1):
+    logger.debug(f'find_best_move hfen1={hfen1}')
 
     mt = int(os.environ.get('HEXACHROMIX_AI_MAX_TIME', 1))
     mi = int(os.environ.get('HEXACHROMIX_AI_MAX_ITERATIONS', 100000))
@@ -117,12 +120,17 @@ def find_best_move(hfen1):
         headers = {}
 
     apiurl = os.environ.get('HEXACHROMIX_API_URL', 'http://api') + '/best/?' + urllib.parse.urlencode({'hfen':hfen1, 'max_time':mt, 'max_iterations':mi})
+    logger.debug(f'find_best_move: url={apiurl}')
 
-    #.use httpx instead. make it async to avoid blocking.
     t = time()
-    req = urllib.request.Request(apiurl, headers=headers)
-    with urllib.request.urlopen(req) as res:
-        data = json.loads(res.read().decode('utf-8'))
+    # req = urllib.request.Request(apiurl, headers=headers)
+    # with urllib.request.urlopen(req) as res:
+        # data = json.loads(res.read().decode('utf-8'))
+    async with httpx.AsyncClient() as client:
+        res = await client.get(apiurl, headers=headers)
+        logger.debug(f'find_best_move: res={res}')
+        data = res.json()
+        logger.debug(f'find_best_move: data={data}')
     t = time() - t
 
     hfen2 = data
@@ -130,7 +138,7 @@ def find_best_move(hfen1):
     state = Game.state_from_hfen(hfen1)
     for move in state.get_legal_moves():
         if state.make_move(move).hfen == hfen2:
-            logger.debug(f'move {move} matches')
+            logger.debug(f'find_best_move: move={move}')
             return {
                 'hfen': hfen2,
                 'q': move[0],

@@ -5,3 +5,4 @@ channels-redis
 asgiref
 redis
 celery
+httpx
