@@ -9,7 +9,12 @@
 	<div id="app">
 		<div class="columns is-desktop">
 			<div class="column">
-				<h3 class="orbitron has-text-centered mb-0">[[ termination_message || status_message ]]</h3>
+				<div class="orbitron has-text-centered mb-0">
+					Game Code
+					<span class="tag is-info is-light">{{ game.code }}</span>
+				</div>
+
+				<h3 class="orbitron has-text-centered mt-2 mb-0">[[ termination_message || status_message ]]</h3>
 
 				<div v-if="!termination_message">
 					<span class="icon-text" :class="[[ socket_is_live ? 'has-text-success' : 'has-text-danger' ]]">
@@ -20,9 +25,11 @@
 					</span>
 				</div>
 
-				<svg viewbox="0 0 100 96" style="width:80vmin; height:80vmin;">
-					<board :x=50 :y=48 :size=50 />
-				</svg>
+				<div class="has-text-centered">
+					<svg viewbox="0 0 100 96" style="width:80vmin; height:80vmin;">
+						<board :x=50 :y=48 :size=50 />
+					</svg>
+				</div>
 			</div>
 
 			<div class="column">
