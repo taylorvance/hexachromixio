@@ -120,7 +120,7 @@ class PlayConsumer(AsyncWebsocketConsumer):
         elif text_data_json['action'] == 'reset_colors':
             await self.reset_colors()
         elif text_data_json['action'] == 'make_ai_move':
-            check_ai.delay(self.game_uid)
+            check_ai.delay(self.game_uid, text_data_json.get('difficulty'))
         elif text_data_json['action'] == 'make_move':
             #.move all of this into a function so we can use it for ai moves too
             game = await fetch_game(self.game_uid)

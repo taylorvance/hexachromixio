@@ -20,7 +20,7 @@ logger.debug(f'using logger {__name__}')
 
 
 @shared_task
-def check_ai(game_uid):
+def check_ai(game_uid, difficulty='easy'):
     logger.debug(f'check_ai: begin {game_uid}')
 
     lock_key = f'ai-proc-{game_uid}'
@@ -51,7 +51,8 @@ def check_ai(game_uid):
         logger.debug('check_ai: √ game not terminal')
 
         logger.info(f'{game_uid}: Finding best move for "{hfen}"...')
-        best_move = asyncio.run(find_best_move(hfen))
+        mt = {'easy':1, 'normal':2, 'hard':3}.get(difficulty)
+        best_move = asyncio.run(find_best_move(hfen, mt))
         if not best_move:
             logger.debug('check_ai: X no best move')
             return
@@ -105,11 +106,11 @@ def check_ai(game_uid):
         cache.delete(lock_key)
 
 
-async def find_best_move(hfen1):
+async def find_best_move(hfen1, mt=1):
     logger.debug(f'find_best_move hfen1={hfen1}')
 
-    mt = int(os.environ.get('HEXACHROMIX_AI_MAX_TIME', 1))
-    mi = int(os.environ.get('HEXACHROMIX_AI_MAX_ITERATIONS', 100000))
+    # mt = int(os.environ.get('HEXACHROMIX_AI_MAX_TIME', 1))
+    mi = int(os.environ.get('HEXACHROMIX_AI_MAX_ITERATIONS', 1000000))
 
     apiuser = os.getenv('HEXACHROMIX_API_USER')
     apipass = os.getenv('HEXACHROMIX_API_PASS')

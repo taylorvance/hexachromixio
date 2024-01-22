@@ -56,7 +56,7 @@ def view_game(request, game_identifier):
         if not request.session.session_key:
             request.session.create()
 
-        return render(request, 'hexachromix/play.html', {'game': game})
+        return render(request, 'hexachromix/play.html', {'game':game, 'game_code':game.code.replace('-',' ')})
     else:
         state = HexachromixState(variant=game.variant)
 

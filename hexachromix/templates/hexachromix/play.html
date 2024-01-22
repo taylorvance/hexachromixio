@@ -9,21 +9,17 @@
 	<div id="app">
 		<div class="columns is-desktop">
 			<div class="column">
-				<div class="orbitron has-text-centered mb-0">
-					Game Code
-					<span class="tag is-info is-light">{{ game.code }}</span>
+				<div v-if="!termination_message" class="orbitron" style="display:flex; justify-content:space-between;">
+					<div v-if="socket_is_live" class="has-text-success"><i class="fas fa-check-circle"></i> Connected</div>
+					<div v-else class="has-text-danger"><i class="fas fa-exclamation-circle"></i> Disconnected</div>
+
+					<div>
+						Game code:
+						<span class="tag is-info is-light" style="user-select:all; cursor:pointer;">{{ game_code }}</span>
+					</div>
 				</div>
 
-				<h3 class="orbitron has-text-centered mt-2 mb-0">[[ termination_message || status_message ]]</h3>
-
-				<div v-if="!termination_message">
-					<span class="icon-text" :class="[[ socket_is_live ? 'has-text-success' : 'has-text-danger' ]]">
-						<span class="icon">
-							<i class="fas" :class="[[ socket_is_live ? 'fa-check-circle' : 'fa-exclamation-circle' ]]"></i>
-						</span>
-						<span class="orbitron">[[ socket_is_live ? 'Connected' : 'Disconnected' ]]</span>
-					</span>
-				</div>
+				<h3 class="orbitron has-text-centered my-0">[[ termination_message || status_message ]]</h3>
 
 				<div class="has-text-centered">
 					<svg viewbox="0 0 100 96" style="width:80vmin; height:80vmin;">
@@ -32,19 +28,29 @@
 				</div>
 			</div>
 
-			<div class="column">
-				<div v-if="!termination_message" class="card">
+			<div v-if="!termination_message" class="column">
+				<div class="card">
 					<header class="card-header">
 						<p class="card-header-title orbitron">Teams</p>
 					</header>
 					<div class="card-content">
 						<div class="content">
-							<color-picker></color-picker>
 							{% if user == game.author %}
-								<hr>
 								<button class="button is-warning orbitron" v-on:click="resetColors()">Reset</button>
+
+								<br>
 								<button class="button orbitron" v-on:click="aiClaimColors()">AI play remaining</button>
+								<div class="select">
+									<select class="orbitron" v-model="ai_difficulty">
+										<option value="easy">Easy</option>
+										<option value="normal">Normal</option>
+										<option value="hard">Hard</option>
+									</select>
+								</div>
+
+								<hr class="my-3">
 							{% endif %}
+							<color-picker></color-picker>
 						</div>
 					</div>
 				</div>

@@ -99,44 +99,35 @@ Vue.component('space', {
 		pieceSize: function() { return this.size * 0.4 },
 		pieceOffset: function() { return this.size * 0.3 },
 		canPlay: function() {
-			if(IS_LIVE === false) return false
+			if(!IS_LIVE) return false
 			if(store.state.isTerminal) return false
 			if(!this.$parent.$parent.isMyTurn) return false
 
 			if(this.char == '') return true
 			if(this.char == store.getters.currentColor.toLowerCase()) return true
-
-			if(store.getters.currentColor == 'R') {
-				if('BG'.includes(this.char)) return true
-			} else if(store.getters.currentColor == 'Y') {
-				if('MC'.includes(this.char)) return true
-			} else if(store.getters.currentColor == 'G') {
-				if('RB'.includes(this.char)) return true
-			} else if(store.getters.currentColor == 'C') {
-				if('YM'.includes(this.char)) return true
-			} else if(store.getters.currentColor == 'B') {
-				if('GR'.includes(this.char)) return true
-			} else if(store.getters.currentColor == 'M') {
-				if('CY'.includes(this.char)) return true
-			}
+			if(store.getters.currentColor=='R' && 'BG'.includes(this.char)) return true
+			if(store.getters.currentColor=='Y' && 'MC'.includes(this.char)) return true
+			if(store.getters.currentColor=='G' && 'RB'.includes(this.char)) return true
+			if(store.getters.currentColor=='C' && 'YM'.includes(this.char)) return true
+			if(store.getters.currentColor=='B' && 'GR'.includes(this.char)) return true
+			if(store.getters.currentColor=='M' && 'CY'.includes(this.char)) return true
 
 			return false
 		},
 		highlight: function() {
+			//.if highlight override
 			if(this.canPlay) return this.colors[store.getters.currentColor].light
-			else return '#eee'
+			return '#eee'
 		},
 		style: function() {
 			if('RGBcmy'.includes(this.char)) return 'mix-blend-mode:screen'
-			else if('rgbCMY'.includes(this.char)) return 'mix-blend-mode:multiply'
-			else return ''
+			if('rgbCMY'.includes(this.char)) return 'mix-blend-mode:multiply'
+			return ''
 		},
 	},
 	methods: {
 		makeMove: function() {
-			if(this.canPlay) {
-				this.$parent.$parent.makeMove(this.q, this.r)
-			}
+			if(this.canPlay) this.$parent.$parent.makeMove(this.q, this.r)
 		},
 	},
 	template: `<g>
@@ -296,26 +287,38 @@ Vue.component('color-picker', {
 		myTeam: function() {
 			for(team of this.teams) {
 				for(color of team) {
-					if(store.state.colorPlayers[color] == this.$parent.pid) return team
+					if(store.state.colorPlayers[color] == this.$parent.pid) {
+						return team
+					}
 				}
 			}
-			return null
 		},
 	},
 	methods: {
+		isClaimed: function(color) { return store.state.colorPlayers[color] },
 		isMine: function(color) { return store.state.colorPlayers[color] == this.$parent.pid },
 		isAI: function(color) { return store.state.colorPlayers[color] && store.state.colorPlayers[color].startsWith('ai:') },
-		isClaimed: function(color) { return store.state.colorPlayers[color] },//.fix
 		canClick: function(color, team) {
 			if(this.isMine(color)) return true
-			else if(this.isClaimed(color)) return false
-			else return !this.myTeam || this.myTeam == team
+			if(this.isClaimed(color)) return false
+			return !this.myTeam || this.myTeam == team
 		},
 		toggleColor: function(color) {
 			if(this.isMine(color)) {
 				this.$parent.releaseColor(color)
 			} else {
 				this.$parent.claimColor(color)
+
+				// Also claim the other unclaimed team colors.
+				for(team of this.teams) {
+					if(team.includes(color)) {
+						for(color2 of team) {
+							if(!this.isClaimed(color2)) {
+								this.$parent.claimColor(color2)
+							}
+						}
+					}
+				}
 			}
 		},
 		icon: function(color) {
@@ -334,7 +337,7 @@ Vue.component('color-picker', {
 				v-on:click="canClick(color,team) && toggleColor(color)"
 				:style="'color:' + (myTeam&&team!=myTeam ? colors[color].light : colors[color].normal) + '; cursor:' + (canClick(color,team) ? 'pointer' : 'not-allowed')"
 			><i class="fa-3x" :class="icon(color)"></i></span>
-			<hr class="my-3">
+			<hr class="my-2">
 		</div>
 
 		<div style="text-align:left">
@@ -413,6 +416,7 @@ const app = new Vue({
 		pid: null,
 		status_message: null,
 		termination_message: null,
+		ai_difficulty: 'normal',
 		ai_interval: null,
 	},
 	beforeMount: function() {
@@ -423,7 +427,7 @@ const app = new Vue({
 		this.colors.B.name = 'Blue'
 		this.colors.M.name = 'Magenta'
 
-		if(IS_LIVE !== false) {
+		if(IS_LIVE) {
 			const uri = (window.location.protocol==='https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/ws/play/' + GAME_UID + '/'
 			this.socket = new ReconnectingWebSocket(uri)
 			this.socket.onopen = this.socket_opened
@@ -435,9 +439,9 @@ const app = new Vue({
 	mounted: function() {
 		// The author should frequently check if it's the AI's turn.
 		// If so, the author will ask the server to make a move.
-		this.polling = setInterval(() => {
+		this.ai_interval = setInterval(() => {
 			if(this.amAuthor && this.isAITurn) this.triggerAI()
-		}, 1000)
+		}, 2000)
 	},
 	beforeDestroy: function() {
 		if(this.ai_interval) {
@@ -453,6 +457,10 @@ const app = new Vue({
 		colorPlayers: function() { return store.state.colorPlayers },
 		isMyTurn: function() { return this.colorPlayers[this.currentColor] == this.pid },
 		isAITurn: function() { return this.colorPlayers[this.currentColor] && this.colorPlayers[this.currentColor].startsWith('ai:') },
+		hasAI: function() {
+			// Returns true if ANY color is claimed by AI.
+			return 'RYGCBM'.split('').some(color => this.colorPlayers[color] && this.colorPlayers[color].startsWith('ai:'))
+		},
 		amAuthor: function() { return this.pid == 'user:'+GAME_AUTHOR },
 	},
 	methods: {
@@ -558,6 +566,7 @@ const app = new Vue({
 		triggerAI: function() {
 			this.socket.send(JSON.stringify({
 				'action': 'make_ai_move',
+				'difficulty': this.ai_difficulty,
 			}))
 		},
 
