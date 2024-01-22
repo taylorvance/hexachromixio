@@ -36,9 +36,6 @@
 					<div class="card-content">
 						<div class="content">
 							{% if user == game.author %}
-								<button class="button is-warning orbitron" v-on:click="resetColors()">Reset</button>
-
-								<br>
 								<button class="button orbitron" v-on:click="aiClaimColors()">AI play remaining</button>
 								<div class="select">
 									<select class="orbitron" v-model="ai_difficulty">
@@ -47,6 +44,8 @@
 										<option value="hard">Hard</option>
 									</select>
 								</div>
+
+								<br><button class="button is-warning orbitron" v-on:click="resetColors()">Reset colors</button>
 
 								<hr class="my-3">
 							{% endif %}
